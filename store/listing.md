@@ -68,3 +68,13 @@ Free and open source (AGPL-3.0): github.com/tristatian/clean-chat
 Run `python3 build_store_zip.py` from the repository root. Upload `dist/clean-chat-<version>.zip`. The zip holds the eight files the extension needs plus the icons; no test fixtures.
 
 Before each upload: bump `version` in `extension/manifest.json`, rebuild, and commit.
+
+## How to submit, step by step
+
+**Account (once).** Sign in at https://chrome.google.com/webstore/devconsole with the Google account the extension should belong to. Two-step verification must be on for that account. Accept the developer agreement and pay the one-time $5. In the Account tab: publisher name, a verified contact email, and the trader question (non-trader: the extension is free and you are not a business).
+
+**Item.** New item → upload `dist/clean-chat-<version>.zip`. Store listing tab: description, category Productivity → Tools, language English, icon `store/icon128.png`, the three screenshots, official and support URLs. Privacy tab: single purpose, one justification per permission box (storage, unlimitedStorage, scripting, host permissions), remote code No, data usage "I do not collect or use user data" plus the certifications, privacy policy URL. Distribution tab: free, Unlisted, all regions. Save draft; fix anything the dashboard marks red.
+
+**Review.** Submit for review and tick **Defer publishing** in the dialog. Status goes to Pending review; Google emails on any change. Rejected: the email names the policy; fix, rebuild, resubmit (free). Approved: a Publish button appears; click it and the item's URL is live for anyone with the link.
+
+**Updates.** Bump `version` in `extension/manifest.json`, run `python3 build_store_zip.py`, upload the new zip on the item's Package tab, submit. The install URL never changes.
