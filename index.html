@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean Chat</title>
+<meta name="description" content="A reading layer for AI chats and Claude Code sessions: erase what you understand, park what can wait, highlight and ask about what you don't, save what matters.">
+<link rel="icon" href="store/icon128.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f7f5ef; --card:#fffdf8; --ink:#1f2a37; --muted:#6b7280; --rule:#e4e0d6; --accent:#b4530a; --later:#7c3aed; --hl:#ffe066;
+          --serif:"Literata",Georgia,serif; --sans:"Public Sans",system-ui,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  @media (prefers-color-scheme: dark) { :root { --paper:#17191d; --card:#1f2227; --ink:#e8e6df; --muted:#9aa0a6; --rule:#2f333a; --hl:#8a6d00; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.55; }
+  main { max-width:860px; margin:0 auto; padding:48px 20px 80px; }
+  h1,h2,h3 { font-family:var(--serif); font-weight:500; letter-spacing:-0.01em; line-height:1.2; }
+  h1 { font-size:44px; margin:0 0 8px; } h2 { font-size:26px; margin:56px 0 12px; } h3 { font-size:18px; margin:24px 0 6px; }
+  .lede { font-size:19px; color:var(--muted); max-width:640px; margin:0 0 24px; }
+  .brand { display:flex; align-items:center; gap:14px; margin-bottom:28px; }
+  .brand img { width:52px; height:52px; border-radius:12px; }
+  .brand span { font-family:var(--serif); font-weight:600; font-size:18px; }
+  .cta { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0 8px; }
+  .btn { display:inline-block; padding:10px 16px; border-radius:10px; border:1px solid var(--rule); background:var(--card); color:var(--ink); text-decoration:none; font-weight:500; }
+  .btn.primary { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .note { font-size:13px; color:var(--muted); }
+  figure { margin:28px 0; } figure img { width:100%; height:auto; border:1px solid var(--rule); border-radius:12px; display:block; background:#fff; }
+  figcaption { font-size:13px; color:var(--muted); margin-top:8px; }
+  .gest { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:18px 0; }
+  .g { background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:14px 16px; }
+  .g b { display:block; font-family:var(--serif); font-size:17px; font-weight:500; margin-bottom:4px; }
+  kbd { font-family:var(--mono); font-size:12px; background:var(--paper); border:1px solid var(--rule); border-bottom-width:2px; border-radius:4px; padding:1px 5px; }
+  .erased { color:var(--muted); text-decoration:line-through; } .parked { color:var(--later); } mark { background:var(--hl); color:inherit; padding:0 2px; border-radius:2px; }
+  ol, ul { padding-left:22px; } li { margin:4px 0; }
+  code { font-family:var(--mono); font-size:13px; background:var(--card); border:1px solid var(--rule); border-radius:4px; padding:1px 5px; }
+  a { color:var(--accent); } footer { margin-top:64px; padding-top:18px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><img src="store/icon128.png" alt=""><span>Clean Chat</span></div>
+  <h1>Read an AI chat like a textbook.</h1>
+  <p class="lede"><span class="erased">Erase what you understand.</span> <span class="parked">Park what can wait.</span> <mark>Highlight and ask about what you don't.</mark> Save what matters. On the chat sites you already use, and on your Claude Code sessions.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/tristatian/clean-chat">Get it on GitHub</a>
+    <a class="btn" href="mockup-v0.html">Try the reader demo</a>
+    <a class="btn" href="https://github.com/tristatian/clean-chat#install">Install steps</a>
+  </div>
+  <p class="note">Free and open source (AGPL-3.0). No server, no account, no analytics: everything stays in your browser or on your computer. A Chrome Web Store listing is in review.</p>
+
+  <h2>Four gestures</h2>
+  <div class="gest">
+    <div class="g"><b>Erase</b>Hover a paragraph, a section or a whole question and answer and press <kbd>e</kbd>. It collapses to a one-line stub. Undo any time; nothing is deleted.</div>
+    <div class="g"><b>Park</b>Press <kbd>l</kbd> to set a passage aside for later. It stays visible in colour so a deadline is not derailed by a curiosity.</div>
+    <div class="g"><b>Ask</b>Select a phrase: a small toolbar offers <i>Ask about this</i>, <i>Simpler</i>, <i>Example</i>. It writes the prompt into the message box; you press send.</div>
+    <div class="g"><b>Save</b>Press <kbd>s</kbd> to keep a question and answer, a section or a paragraph in one list across every site, with tags, highlights and your own notes.</div>
+  </div>
+  <figure><img src="store/screenshots/1-chat.png" alt="A chat page with an understood stub, a parked code block and the selection toolbar"><figcaption>On a chat site: an understood section folded to a stub, a code block parked for later, and the toolbar on a selected phrase.</figcaption></figure>
+  <figure><img src="store/screenshots/2-saved.png" alt="The saved page with notes from several sites"><figcaption>The saved page: one list across sites, pinned and tagged, a highlight with a note, and a follow-up thread.</figcaption></figure>
+
+  <h2>Made for Claude Code too</h2>
+  <p>The companion reader renders a Claude Code session as the same kind of page. Erase, park and highlight as on a site, then ask a follow-up right under the passage. The answer comes from a fork of the session, so the original is never touched, and the forked run is read-only: no shell, no edits, no web. The bottom box knows what you highlighted, asked and parked, and one click gives you five questions to ask next, the big picture behind your questions, or a concept map drawn as a tree.</p>
+  <p>Answers run through your own <code>claude</code> command and your own login or API key. Save from the reader into the extension's list, and ask further on any saved note, from any site.</p>
+  <figure><img src="store/screenshots/3-reader.png" alt="The Claude Code reader page"><figcaption>The reader. <a href="mockup-v0.html">Open the demo</a> with example content; follow-up answers in the demo are canned.</figcaption></figure>
+  <p>Setup: Python 3 and the <code>claude</code> command. Double-click <code>Start Reader.command</code>, or install the slash commands and type <code>/reader</code> in any session. Details in <a href="https://github.com/tristatian/clean-chat/blob/main/claude-code/README.md">the reader's README</a>.</p>
+
+  <h2>Which sites</h2>
+  <p>Nineteen of the most used AI chat sites, in English and Chinese, through shared markup rules and a structural fallback that needs no site-specific hooks. Four are checked live by the author. If a site misbehaves, press <kbd>h</kbd> on the page, click <i>copy page info</i>, and paste it into <a href="https://github.com/tristatian/clean-chat/issues">an issue</a>. It contains markup names only, no words from your conversation.</p>
+
+  <h2>Privacy</h2>
+  <p>There is no Clean Chat server. The extension reads the chat page it is on and writes to its own storage. Its only network calls are to your own computer (the optional reader) and to an endpoint you type in yourself. The reader serves pages to <code>127.0.0.1</code> only and never stores your login. Full statement and threat model: <a href="https://github.com/tristatian/clean-chat#privacy">Privacy</a> and <a href="https://github.com/tristatian/clean-chat/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+  <footer>Built by Ziyao (Trista) Tian with Claude Code. <a href="https://github.com/tristatian/clean-chat">Source</a> · <a href="https://github.com/tristatian/clean-chat/blob/main/CONTRIBUTING.md">Contributing</a></footer>
+</main>
+</body>
+</html>
