@@ -25,6 +25,17 @@ Each folder's README has the install steps and the full list of gestures.
 
 Everything stays in your browser (the extension's own storage) or on your Mac (the reader's folder and `~/.clean-chat/`). The extension reads the chat page it is on and writes to its own storage. It sends nothing anywhere unless you configure the optional Google Doc endpoint, and then only the one note you chose to save. The reader serves pages to `127.0.0.1` only and takes questions only from its own page and from the extension once introduced. Answers asked from the reader run through your own `claude` command, on your own account.
 
+There is no Clean Chat server. Nothing you read, mark, save or ask is sent to the author, and there is no analytics, crash reporting or install tracking. You can check this yourself: the extension's only network calls are to `127.0.0.1` (the reader) and to the endpoint you typed in yourself, and the reader's only outbound call is the `claude` command. This section is the extension's privacy policy.
+
+## Your own model access
+
+Asking a question from the reader, or from a saved note, runs the official `claude` command on your machine. Whatever that command is signed in as is what pays for the answer:
+
+- A Claude subscription (Pro or Max): run `claude` once in a terminal and `/login`. The reader does nothing with your login besides calling the command.
+- An API key: set `ANTHROPIC_API_KEY` in your shell as you would for Claude Code itself. `ANTHROPIC_BASE_URL` is passed through too, so a compatible endpoint works the same way.
+
+Clean Chat never reads, stores or copies your credentials or tokens, and it never signs in for you. Every answer is run read-only: the forked session may read your project, never edit it or run commands.
+
 ## Install
 
 - Extension: `chrome://extensions`, Developer mode, **Load unpacked**, pick the `extension` folder. Details in [`extension/README.md`](extension/README.md).

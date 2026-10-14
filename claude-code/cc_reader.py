@@ -209,8 +209,10 @@ def ask_fork(session, proj, question, quote, context, scope="passage", turn=None
           ["--output-format", "stream-json", "--verbose", "--include-partial-messages", "--disallowedTools", READ_ONLY]
     cwd = str(proj) if proj and Path(proj).is_dir() else None
     # Started from inside a Claude Code session (the /reader skill does that), the environment carries that session's
-    # own login variables, which a fresh `claude` must not inherit: without them it signs in the normal way.
-    env = {k: v for k, v in os.environ.items() if not (k.startswith(("ANTHROPIC_", "CLAUDE_CODE_")) or k == "CLAUDECODE")}
+    # markers, which a fresh `claude` must not inherit or it believes it is nested. Everything else passes through, so
+    # a user who pays by API key (ANTHROPIC_API_KEY, or ANTHROPIC_BASE_URL for a compatible endpoint) is honoured
+    # exactly as in their own terminal; a user with a subscription is honoured through the CLI's stored login.
+    env = {k: v for k, v in os.environ.items() if not (k.startswith("CLAUDE_CODE_") or k == "CLAUDECODE")}
     try:
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env,
                              text=True, encoding="utf-8", errors="replace")
