@@ -2,7 +2,7 @@
 
 A reading layer for AI chats. Erase what you understand, park what can wait, highlight and ask about what you don't, and keep what matters: on the chat sites you already use, and on your Claude Code sessions.
 
-Built by Ziyao (Trista) Tian. Used daily on my own reading; not yet on any store. Built with Claude Code, with every change reviewed by me.
+Built by Ziyao (Trista) Tian. Used daily on my own reading; not yet on any store.
 
 ## Two parts
 
