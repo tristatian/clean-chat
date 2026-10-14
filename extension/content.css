@@ -1,0 +1,200 @@
+/* Clean Chat — reading-mode layer for claude.ai and gemini.google.com. Everything is prefixed cc- and lives in an overlay,
+   except a few classes applied to the site's own elements: .cc-block / .cc-turn (hover targets),
+   .cc-erased / .cc-turn-erased (stubs), .cc-later (parked), .cc-reply-hidden. */
+
+:root {
+  --cc-ink: #1e2229;
+  --cc-paper: #ffffff;
+  --cc-muted: #7a8188;
+  --cc-rule: rgba(30, 34, 41, 0.14);
+  --cc-accent: #2b5c8a;
+  --cc-accent-soft: rgba(43, 92, 138, 0.12);
+  --cc-ok: #3b7a57;
+  --cc-ok-soft: rgba(59, 122, 87, 0.14);
+  --cc-hl: #ffe58a;
+  --cc-shadow: 0 8px 24px rgba(30, 34, 41, 0.16);
+  --cc-later: #d9480f;
+  --cc-later-soft: rgba(217, 72, 15, 0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cc-ink: #e6e8e3;
+    --cc-paper: #1c2025;
+    --cc-muted: #8b9299;
+    --cc-rule: rgba(230, 232, 227, 0.16);
+    --cc-accent: #7fb2d9;
+    --cc-accent-soft: rgba(127, 178, 217, 0.16);
+    --cc-ok: #7cc29b;
+    --cc-ok-soft: rgba(124, 194, 155, 0.16);
+    --cc-hl: rgba(255, 229, 138, 0.32);
+    --cc-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --cc-later: #ff8a50;
+    --cc-later-soft: rgba(255, 138, 80, 0.16);
+  }
+}
+html.dark, body.dark-theme {
+  --cc-ink: #e6e8e3;
+  --cc-paper: #1c2025;
+  --cc-muted: #8b9299;
+  --cc-rule: rgba(230, 232, 227, 0.16);
+  --cc-accent: #7fb2d9;
+  --cc-accent-soft: rgba(127, 178, 217, 0.16);
+  --cc-ok: #7cc29b;
+  --cc-ok-soft: rgba(124, 194, 155, 0.16);
+  --cc-hl: rgba(255, 229, 138, 0.32);
+  --cc-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --cc-later: #ff8a50;
+  --cc-later-soft: rgba(255, 138, 80, 0.16);
+}
+
+/* ---- stubs: one style for an erased paragraph and for an erased question, whatever font the site used ---- */
+.cc-block { transition: opacity 160ms ease; }
+.cc-block.cc-erased, .cc-turn.cc-turn-erased {
+  display: block !important;
+  position: relative;
+  max-height: 1.6em !important;
+  overflow: hidden !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.6em !important;
+  font-style: italic;
+  font-weight: 400 !important;
+  color: var(--cc-muted) !important;
+  opacity: 1;
+  margin: 4px 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px dashed var(--cc-rule) !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  /* fit the column whatever the site's layout: a content-sized wrapper or a flex row would otherwise let the
+     one-line stub grow to the full text width and get clipped with no ellipsis */
+  width: 100% !important;
+  max-width: min(100%, calc(100vw - 32px)) !important;
+  min-width: 0 !important;
+  flex: 1 1 100% !important;
+  align-self: stretch !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  overflow-x: hidden !important;
+  text-overflow: ellipsis;
+  text-align: left !important;
+  cursor: pointer;
+}
+/* a content-sized wrapper between the stub and the column must not size itself to the stub's text */
+.cc-turn.cc-turn-erased > *, .cc-turn.cc-turn-erased > * > * { max-width: 100% !important; width: auto !important; }
+.cc-block.cc-erased::before, .cc-turn.cc-turn-erased::before {
+  content: "understood · ";
+  font-style: normal;
+  font-weight: 600;
+  color: var(--cc-muted);
+}
+.cc-turn.cc-turn-erased::before { content: "understood · question and answer · "; }
+/* a collapsed section: one line for the whole thing, the rest hidden behind it */
+.cc-block.cc-erased.cc-under { display: none !important; }
+.cc-block.cc-erased[data-cc-n]::before { content: "understood · +" attr(data-cc-n) " more · "; }
+.cc-block.cc-erased *, .cc-turn.cc-turn-erased * {
+  display: inline !important;
+  font: inherit !important;
+  color: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+}
+.cc-block.cc-erased img, .cc-block.cc-erased svg, .cc-turn.cc-turn-erased img, .cc-turn.cc-turn-erased svg, .cc-turn.cc-turn-erased button { display: none !important; }
+.cc-block.cc-erased:hover, .cc-turn.cc-turn-erased:hover { color: var(--cc-ink) !important; }
+.cc-block.cc-erased + .cc-block.cc-erased { border-top: 0 !important; }
+.cc-hide-stubs .cc-block.cc-erased, .cc-hide-stubs .cc-turn-erased { display: none !important; }
+.cc-reply-hidden { display: none !important; }
+
+/* ---- later: bright and tinted so it never reads as done, and never gets missed ---- */
+.cc-block.cc-erased.cc-later, .cc-turn.cc-turn-erased.cc-later {
+  color: var(--cc-later) !important;
+  background: var(--cc-later-soft) !important;
+  border-top-color: var(--cc-later) !important;
+  border-radius: 4px;
+  padding: 0 6px !important;
+}
+.cc-block.cc-erased.cc-later::before, .cc-turn.cc-turn-erased.cc-later::before { content: "later · "; color: var(--cc-later); }
+.cc-block.cc-erased.cc-later[data-cc-n]::before { content: "later · +" attr(data-cc-n) " more · "; }
+.cc-turn.cc-turn-erased.cc-later::before { content: "later · question and answer · "; }
+.cc-block.cc-erased.cc-later:hover, .cc-turn.cc-turn-erased.cc-later:hover { color: var(--cc-later) !important; filter: brightness(0.85); }
+.cc-block.cc-erased.cc-later + .cc-block.cc-erased.cc-later { border-top: 1px dashed var(--cc-later) !important; }
+
+/* ---- a collapsed question takes its attachments with it ---- */
+.cc-extra-hidden { display: none !important; }
+.cc-turn.cc-turn-erased :is(img, video, canvas, svg, button, a[download], [data-testid*="file" i], [data-testid*="attach" i], [data-testid*="thumbnail" i], [class*="attachment" i], [class*="thumbnail" i], [class*="file-preview" i], [class*="filepreview" i]) { display: none !important; }
+.cc-turn.cc-turn-erased.cc-has-attach::before { content: "understood · question, attachments and answer · "; }
+.cc-turn.cc-turn-erased.cc-later.cc-has-attach::before { content: "later · question, attachments and answer · "; }
+
+/* a highlighted figure: chart, diagram or image */
+.cc-figure.cc-fig-hl { outline: 3px solid #ffd43b !important; outline-offset: 4px; border-radius: 4px; }
+.cc-gbtn.cc-mark-btn { width: auto; padding: 0 8px; font-size: 11px; font-weight: 600; }
+.cc-gbtn.cc-mark-btn:hover { background: var(--cc-hl); border-color: #e0b400; color: #1e2229; }
+
+/* the highlighter */
+mark.cc-hl { background: var(--cc-hl); color: inherit; padding: 0.05em 0; border-radius: 2px; cursor: pointer; }
+
+/* ---- overlay layer ---- */
+#cc-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 2147483000; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 13px; color: var(--cc-ink); }
+#cc-layer * { box-sizing: border-box; }
+/* the overlay must never end up inside a text selection or a copy */
+#cc-layer, #cc-layer * { user-select: none; -webkit-user-select: none; }
+#cc-layer input, #cc-layer textarea { user-select: text; -webkit-user-select: text; }
+#cc-layer button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+#cc-layer button:focus-visible { outline: 2px solid var(--cc-accent); outline-offset: 2px; }
+
+/* gutter with ✓, ? and later that follows the hovered block */
+#cc-layer [hidden] { display: none !important; }
+.cc-gutter { position: fixed; display: flex; gap: 4px; }
+/* narrow window / split view: no margin to sit in, so the buttons float over the page and need their own ground */
+.cc-gutter.cc-floating { padding: 3px; border-radius: 9px; background: var(--cc-paper); border: 1px solid var(--cc-rule); box-shadow: var(--cc-shadow); }
+.cc-gutter[hidden] { display: none; }
+.cc-gbtn { width: 28px; height: 24px; border-radius: 6px; border: 1px solid var(--cc-rule); background: var(--cc-paper); box-shadow: 0 1px 2px rgba(0,0,0,0.08); font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; color: var(--cc-ink); }
+.cc-gbtn:hover { border-color: var(--cc-accent); color: var(--cc-accent); }
+.cc-gbtn.cc-got:hover { border-color: var(--cc-ok); color: var(--cc-ok); background: var(--cc-ok-soft); }
+.cc-gbtn.cc-sec { width: auto; padding: 0 8px; font-size: 11px; font-weight: 500; }
+.cc-gbtn.cc-later-btn { width: auto; padding: 0 8px; font-size: 11px; font-weight: 600; color: var(--cc-later); border-color: var(--cc-later); }
+.cc-gbtn.cc-later-btn:hover { color: var(--cc-paper); background: var(--cc-later); border-color: var(--cc-later); }
+.cc-gbtn.cc-notes-btn { width: auto; padding: 0 8px; font-size: 11px; font-weight: 600; color: var(--cc-accent); }
+.cc-gbtn.cc-notes-btn:hover { color: var(--cc-paper); background: var(--cc-accent); border-color: var(--cc-accent); }
+
+/* selection toolbar */
+.cc-seltool { position: fixed; display: flex; gap: 2px; padding: 4px; background: var(--cc-ink); color: var(--cc-paper); border-radius: 8px; box-shadow: var(--cc-shadow); transform: translate(-50%, calc(-100% - 10px)); white-space: nowrap; }
+.cc-seltool[hidden] { display: none; }
+.cc-seltool button { color: inherit; padding: 5px 9px; border-radius: 5px; font-size: 12.5px; font-weight: 500; }
+.cc-seltool button:hover { background: rgba(255,255,255,0.14); }
+.cc-seltool button.cc-primary { background: #ffe58a; color: #1e2229; }
+.cc-seltool::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; background: var(--cc-ink); transform: translateX(-50%) rotate(45deg); }
+.cc-seltool.cc-below { transform: translate(-50%, 10px); }
+.cc-seltool.cc-below::after { bottom: auto; top: -5px; }
+
+/* panel (press h) */
+.cc-panel { position: fixed; right: 16px; bottom: 112px; width: 340px; max-width: calc(100vw - 32px); max-height: 60vh; display: flex; flex-direction: column; background: var(--cc-paper); border: 1px solid var(--cc-rule); border-radius: 12px; box-shadow: var(--cc-shadow); overflow: hidden; }
+.cc-panel[hidden] { display: none; }
+.cc-panel header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--cc-rule); font-weight: 600; }
+.cc-panel header button { font-size: 11.5px; font-weight: 500; color: var(--cc-accent); }
+.cc-panel .cc-list { overflow: auto; padding: 0 0 6px; flex: 1; }
+.cc-sec { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cc-muted); }
+.cc-sec b { color: var(--cc-ink); margin-left: 4px; }
+.cc-sec button { font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--cc-accent); margin-left: 8px; }
+.cc-item { display: flex; gap: 8px; align-items: baseline; padding: 6px 12px; font-size: 12px; }
+.cc-item .cc-kind { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; color: var(--cc-later); }
+.cc-item .cc-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cc-muted); font-style: italic; }
+.cc-item button { color: var(--cc-accent); font-size: 11.5px; }
+.cc-item button + button { margin-left: 6px; }
+.cc-item input.cc-endpoint { flex: 1; min-width: 0; font: inherit; font-size: 11.5px; color: var(--cc-ink); background: transparent; border: 1px solid var(--cc-rule); border-radius: 6px; padding: 4px 8px; }
+.cc-item input.cc-endpoint:focus { outline: none; border-color: var(--cc-accent); }
+.cc-panel .cc-empty { padding: 10px 12px 14px; color: var(--cc-muted); font-size: 12px; }
+.cc-panel footer { padding: 8px 12px; border-top: 1px solid var(--cc-rule); font-size: 11.5px; color: var(--cc-muted); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.cc-panel footer label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.cc-panel kbd { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; border: 1px solid var(--cc-rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+
+/* toast */
+.cc-toast { position: fixed; left: 50%; bottom: 112px; transform: translateX(-50%); max-width: calc(100vw - 32px); display: flex; gap: 12px; align-items: center; padding: 9px 12px 9px 14px; border-radius: 8px; background: var(--cc-ink); color: var(--cc-paper); box-shadow: var(--cc-shadow); font-size: 13px; }
+.cc-toast[hidden] { display: none; }
+.cc-toast button { color: #ffe58a; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { .cc-block { transition: none; } }

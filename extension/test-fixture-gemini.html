@@ -1,0 +1,45 @@
+<!doctype html>
+<html data-cc-site="gemini.google.com">
+<meta charset="utf-8">
+<title>Clean Chat extension — Gemini-shaped test fixture</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #1e2229; }
+  user-query, model-response, message-content, rich-textarea, user-query-content { display: block; }
+  .conversation { display: flex; flex-direction: column; align-items: flex-end; }
+  .conversation model-response { align-self: stretch; }
+  user-query { margin: 24px 0 12px; }
+  .user-query-container { display: flex; justify-content: flex-end; }
+  .user-query-bubble { background: #e8f0fe; border-radius: 18px; padding: 10px 16px; width: fit-content; }
+  model-response { padding: 0 4px; line-height: 1.6; }
+  .markdown pre { background: #f1f3f4; padding: 10px; border-radius: 8px; }
+  .ql-editor { border: 1px solid #c8ccd2; border-radius: 24px; min-height: 56px; padding: 14px 18px; margin-top: 32px; white-space: pre-wrap; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<p class="note">Imitates gemini.google.com's markup (user-query, model-response, Quill editor). The html tag carries data-cc-site so the Gemini profile is used on localhost.</p>
+<main><div class="conversation">
+  <user-query><div class="user-query-container"><div class="user-query-bubble"><user-query-content><span class="cdk-visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">You said</span><span class="query-text">What is PKCE and why does a static site need it? I keep reading that the client secret cannot be kept in the browser, but I do not see what the attacker would actually do with an intercepted authorization code if there is no secret involved at all.</span></user-query-content></div></div></user-query>
+  <model-response><message-content><div class="markdown markdown-main-panel">
+    <h2>What PKCE does</h2>
+    <p>PKCE lets an app that cannot keep a secret run the OAuth authorization-code flow safely. The app proves it started the login with a one-time secret it generated itself.</p>
+    <ul>
+      <li>Generate a random verifier, hash it with SHA-256, base64url-encode the digest.</li>
+      <li>Send the hash with the authorize request; keep the verifier in the browser.</li>
+      <li>Trade the returned code plus the verifier for tokens.</li>
+    </ul>
+    <p>An attacker who intercepts the code cannot redeem it without the verifier.</p>
+  </div></message-content></model-response>
+  <user-query><user-query-content>
+    <div class="file-preview-container" style="margin-bottom:6px"><img alt="screenshot.png" width="96" height="64" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='64'><rect width='96' height='64' fill='%23c9d6f5'/></svg>"></div>
+    <span class="query-text">What happens when the access token expires?</span>
+  </user-query-content></user-query>
+  <model-response><message-content><div class="markdown markdown-main-panel">
+    <p>Access tokens last about an hour. Use the refresh token to get a new one without another login, and store the newest refresh token each time.</p>
+    <pre><code>POST /api/token
+grant_type=refresh_token&amp;refresh_token=…</code></pre>
+  </div></message-content></model-response>
+  </div>
+  <rich-textarea><div class="ql-editor" contenteditable="true" aria-label="Enter a prompt (fake composer)"></div></rich-textarea>
+</main>
+<script src="content.js"></script>
+</html>

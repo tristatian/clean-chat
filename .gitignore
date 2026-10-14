@@ -1,0 +1,13 @@
+# built output and local state
+/reader/
+backlog.html
+__pycache__/
+*.pyc
+.DS_Store
+# personal documents and working notes, never part of the code
+*.docx
+*.pdf
+docx_part*.py
+agents-eval-redteam.*
+sample-page.html
+backlog-sample.html

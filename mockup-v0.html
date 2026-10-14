@@ -1,0 +1,1093 @@
+<meta charset="utf-8">
+<title>Clean Chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F5F6F2;
+    --surface: #FFFFFF;
+    --ink: #1E2229;
+    --ink-2: #4A5058;
+    --muted: #7A8188;
+    --rule: #DCDFD8;
+    --ghost: #C3C8BF;
+    --accent: #2B5C8A;
+    --accent-soft: #E3ECF4;
+    --hl: #FFE58A;
+    --hl-ink: #1E2229;
+    --ok: #3B7A57;
+    --ok-soft: #E1EFE6;
+    --shadow: 0 8px 24px rgba(30, 34, 41, 0.10);
+    --later: #D9480F;
+    --serif: "Literata", "Iowan Old Style", "Charter", Georgia, serif;
+    --sans: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181C;
+      --surface: #1C2025;
+      --ink: #E6E8E3;
+      --ink-2: #B8BDB6;
+      --muted: #858C93;
+      --rule: #2C3138;
+      --ghost: #3A4048;
+      --accent: #7FB2D9;
+      --accent-soft: #22303C;
+      --hl: rgba(255, 229, 138, 0.28);
+      --hl-ink: #F3EBC8;
+      --ok: #7CC29B;
+      --ok-soft: #1E2F27;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      --later: #FF8A50;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15181C;
+    --surface: #1C2025;
+    --ink: #E6E8E3;
+    --ink-2: #B8BDB6;
+    --muted: #858C93;
+    --rule: #2C3138;
+    --ghost: #3A4048;
+    --accent: #7FB2D9;
+    --accent-soft: #22303C;
+    --hl: rgba(255, 229, 138, 0.28);
+    --hl-ink: #F3EBC8;
+    --ok: #7CC29B;
+    --ok-soft: #1E2F27;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --later: #FF8A50;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  ::selection { background: var(--hl); color: var(--hl-ink); }
+
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ---------- top bar ---------- */
+  .bar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 20px;
+    padding: 10px 20px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .brand { font-family: var(--serif); font-weight: 600; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap; }
+  .brand .sub { font-family: var(--sans); font-weight: 500; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-left: 8px; }
+  .spacer { flex: 1; }
+  .barbtn {
+    padding: 6px 10px; border-radius: 6px; border: 1px solid var(--rule); background: var(--surface);
+    font-size: 12px; font-weight: 500; color: var(--ink-2); white-space: nowrap;
+  }
+  .barbtn b { color: var(--accent); font-weight: 600; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .barbtn[aria-pressed="true"] { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+
+  /* ---------- reading column ---------- */
+  .page { flex: 1; padding-block: 28px 140px; padding-inline: 16px; }
+  .column { max-width: 720px; margin: 0 auto; }
+  .hint {
+    font-size: 12.5px; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 28px; display: flex; gap: 14px; flex-wrap: wrap;
+  }
+  .hint kbd { font-family: var(--mono); font-size: 11px; background: var(--paper); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+  .doc-title { font-family: var(--serif); font-size: 30px; font-weight: 500; line-height: 1.2; letter-spacing: -0.015em; margin: 0 0 6px; text-wrap: balance; }
+  .doc-meta { color: var(--muted); font-size: 12px; margin-bottom: 26px; }
+
+  article { font-family: var(--serif); font-size: 17.5px; line-height: 1.62; font-optical-sizing: auto; }
+
+  .blk { position: relative; padding-left: 0; margin: 0; border-radius: 6px; }
+  .blk + .blk { margin-top: 14px; }
+  .blk[data-type="h2"] { margin-top: 34px; }
+  .blk[data-type="h2"] + .blk { margin-top: 10px; }
+  .blk:focus { outline: none; }
+  .blk:focus-visible > .body { box-shadow: -3px 0 0 0 var(--accent); }
+  .blk .body { transition: opacity 180ms ease; }
+  .blk h2 { font-size: 21px; font-weight: 600; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  .blk p { margin: 0; }
+  .blk h3 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -0.005em; }
+  .blk[data-type="h3"] { margin-top: 22px; }
+  .blk[data-type="h3"] + .blk { margin-top: 8px; }
+  .blk pre { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; }
+  .blk pre code { border: 0; background: none; padding: 0; font-size: inherit; }
+  .blk p.li { padding-left: 1.6em; position: relative; }
+  .blk p.li .marker { position: absolute; left: 0.2em; color: var(--muted); font-family: var(--sans); font-size: 0.85em; top: 0.2em; }
+  .blk p.li .marker:empty::before { content: "•"; }
+  .blk[data-type="li"] + .blk[data-type="li"] { margin-top: 6px; }
+  .blk p.quote-blk { border-left: 3px solid var(--rule); padding-left: 14px; color: var(--ink-2); font-style: italic; }
+  .blk p.asked { font-family: var(--sans); font-size: 14px; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 14px; }
+  .blk p.asked .asked-label { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+  .blk[data-type="ask"] { margin-top: 30px; }
+  .blk[data-type="ask"] + .blk { margin-top: 12px; }
+  .blk.hiddenblk { display: none !important; }
+  .blk.erased.turn .ghost .gtext::before { content: "understood · "; }
+  .blk.erased.later .ghost { color: var(--later); border-top-color: var(--later); background: color-mix(in srgb, var(--later) 10%, transparent); border-radius: 4px; padding: 3px 6px; }
+  .blk.erased.later .ghost .gtext::before { font-weight: 600; }
+  .blk.erased .ghost .gtext::before { font-weight: 600; }
+  .blk.erased.later .ghost .gtext::before, .blk.erased.turn.later .ghost .gtext::before { content: "later · "; }
+  .blk.erased.later + .blk.erased.later .ghost { border-top: 0; }
+  .title-row.erased.later .title-ghost { color: var(--later); border-top-color: var(--later); background: color-mix(in srgb, var(--later) 10%, transparent); border-radius: 4px; padding: 4px 6px 6px; }
+  .title-row { position: relative; }
+  .title-row .turnbtns { position: absolute; right: 100%; margin-right: 10px; top: 10px; display: flex; gap: 4px; white-space: nowrap; opacity: 0; transition: opacity 120ms ease; font-family: var(--sans); }
+  .title-row:hover .turnbtns, .title-row .turnbtns:focus-within { opacity: 1; }
+  .title-row .title-ghost { display: none; }
+  .title-row.erased .doc-title, .title-row.erased .turnbtns { display: none; }
+  .title-row.erased .title-ghost { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 12px; color: var(--ghost); border-top: 1px dashed var(--ghost); padding: 4px 0 10px; cursor: pointer; font-style: italic; }
+  .title-row.erased .title-ghost .restore { color: var(--muted); font-size: 11px; font-style: normal; opacity: 0; }
+  .title-row.erased:hover .title-ghost .restore { opacity: 1; }
+  @media (max-width: 1180px) { .title-row .turnbtns { position: static; opacity: 1; margin-bottom: 8px; } }
+  .blk a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .blk code { font-family: var(--mono); font-size: 0.86em; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 0 4px; }
+  .blk .stepnum { font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.06em; margin-right: 8px; vertical-align: 0.15em; }
+  mark.hl { background: var(--hl); color: var(--hl-ink); padding: 0.05em 0; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+  /* gutter (block actions) */
+  /* buttons, stubs and footers are never part of a selection or of what is copied */
+  .gutter, .turnbtns, .ghost, .title-ghost, .tactions, .tmeta, .seltool, .composer, .hint, .thinking, .caret { user-select: none; -webkit-user-select: none; }
+  .gutter {
+    position: absolute; right: 100%; margin-right: 10px; top: 2px; display: flex; gap: 4px; justify-content: flex-end; white-space: nowrap;
+    opacity: 0; transition: opacity 120ms ease; font-family: var(--sans);
+  }
+  .blk:hover > .gutter, .blk:focus-within > .gutter { opacity: 1; }
+  .gbtn {
+    width: 30px; height: 26px; border-radius: 6px; border: 1px solid var(--rule); background: var(--surface);
+    font-size: 13px; font-weight: 600; color: var(--ink-2); display: inline-flex; align-items: center; justify-content: center;
+  }
+  .gbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .gbtn.got:hover { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+  .gbtn.sec { width: auto; padding: 0 8px; font-size: 11px; font-weight: 500; }
+  .gbtn.later { width: auto; padding: 0 8px; font-size: 11px; font-weight: 600; color: var(--later); border-color: var(--later); }
+  .gbtn.later:hover { color: var(--surface); background: var(--later); border-color: var(--later); }
+  .gbtn.notes { width: auto; padding: 0 8px; font-size: 11px; font-weight: 600; color: var(--accent); }
+  .gbtn.notes:hover { color: var(--surface); background: var(--accent); border-color: var(--accent); }
+  mark.hl { cursor: pointer; }
+  @media (hover: none) { .gutter { opacity: 1; position: static; margin-bottom: 6px; } }
+  @media (max-width: 1180px) { .gutter { position: static; margin: 0 0 6px; justify-content: flex-start; opacity: 1; } .blk:hover > .gutter { opacity: 1; } }
+
+  /* erased state */
+  .blk.erased > .body, .blk.erased > .threads, .blk.erased > .gutter { display: none; }
+  .blk .ghost { display: none; }
+  .blk.erased .ghost {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--sans); font-size: 12px; color: var(--ghost);
+    border-top: 1px dashed var(--ghost); padding-top: 4px; min-height: 18px;
+    cursor: pointer;
+  }
+  .blk.erased .ghost .gtext { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; }
+  .blk.erased .ghost .gtext::before { content: "understood · "; font-style: normal; }
+  .blk.erased .ghost .restore { color: var(--muted); font-size: 11px; opacity: 0; }
+  .blk.erased:hover .ghost .restore, .blk.erased:focus-within .ghost .restore { opacity: 1; }
+  .blk.erased + .blk { margin-top: 8px; }
+  .blk.erased + .blk.erased { margin-top: 2px; }
+  .blk.erased + .blk.erased .ghost { border-top: 0; padding-top: 0; }
+
+  /* threads (anchored follow-ups) */
+  .threads { font-family: var(--serif); }
+  .thread { margin: 12px 0 4px 18px; padding-left: 16px; border-left: 2px solid var(--accent); position: relative; }
+  .thread .tq { font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin-bottom: 6px; display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+  .thread .tq .who { font-weight: 600; color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .thread .tq .quote { color: var(--muted); font-style: italic; }
+  .thread .tq .quote::before { content: "re “"; } .thread .tq .quote::after { content: "”"; }
+  .thread .ta { font-size: 16px; line-height: 1.58; color: var(--ink); min-height: 1.5em; }
+  .thread .ta .caret { display: inline-block; width: 2px; height: 1em; background: var(--accent); vertical-align: -0.15em; margin-left: 2px; animation: blink 900ms steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .thread .tactions { display: flex; gap: 6px; margin-top: 6px; font-family: var(--sans); }
+  .thread .tactions button { font-size: 11.5px; font-weight: 500; color: var(--muted); padding: 3px 8px; border-radius: 5px; border: 1px solid transparent; }
+  .thread .tactions button:hover { border-color: var(--rule); color: var(--ink-2); background: var(--surface); }
+  .thread .tactions button.tgot:hover { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
+  .thread.erased { border-left-style: dashed; border-left-color: var(--ghost); }
+  .thread.erased .ta, .thread.erased .tactions { display: none; }
+  .thread.erased .tq { color: var(--ghost); }
+  .thread.erased .tq::after { content: "understood"; font-size: 11px; font-style: italic; margin-left: 4px; }
+
+  /* ask box */
+  .askbox { margin: 10px 0 4px 18px; padding-left: 16px; border-left: 2px solid var(--rule); font-family: var(--sans); }
+  .askbox .chip { display: inline-block; font-size: 12px; color: var(--ink-2); background: var(--hl); border-radius: 4px; padding: 1px 6px; margin-bottom: 6px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .askbox input {
+    width: 100%; font: inherit; font-size: 14px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 9px 12px;
+  }
+  .askbox input::placeholder { color: var(--muted); }
+  .askbox .quick { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .askbox .quick button { font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 4px 11px; }
+  .askbox .quick button.cancel { color: var(--muted); background: transparent; }
+
+  /* selection toolbar */
+  .thread .tmeta { font: 12px var(--sans); color: var(--muted); margin-top: 4px; }
+  .thread > .threads { margin-top: 6px; }
+  .thread .thread { margin-left: 6px; }
+  .thread.erased > .threads { display: none; }
+  label.scope { font: 12px var(--sans); color: var(--muted); display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; cursor: pointer; }
+  .thread .ta .thinking, .thread .ta .muted { color: var(--muted); font-family: var(--sans); font-size: 13px; }
+  .thread .ta p { margin: 0 0 8px; }
+  .thread .ta ul, .thread .ta ol { margin: 0 0 8px 20px; padding: 0; }
+  .thread .ta pre { background: rgba(0,0,0,0.05); padding: 8px 10px; border-radius: 6px; overflow: auto; font-size: 13px; }
+  .seltool {
+    position: absolute; z-index: 30; display: flex; gap: 2px; padding: 4px;
+    background: var(--ink); color: var(--paper); border-radius: 8px; box-shadow: var(--shadow);
+    font-family: var(--sans); font-size: 12.5px; font-weight: 500; transform: translate(-50%, calc(-100% - 10px));
+  }
+  .seltool button { color: inherit; padding: 5px 9px; border-radius: 5px; }
+  .seltool button:hover { background: rgba(255,255,255,0.14); }
+  .seltool button.primary { background: var(--hl); color: #1E2229; }
+  .seltool::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; background: var(--ink); transform: translateX(-50%) rotate(45deg); }
+
+  /* composer */
+  .composer {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    padding: 12px 16px 16px;
+    background: linear-gradient(to top, var(--paper) 70%, transparent);
+    pointer-events: none;
+  }
+  .composer .tools { pointer-events: auto; max-width: 720px; margin: 0 auto 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-family: var(--sans); }
+  .composer .tools button { font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 4px 11px; }
+  .composer .tools button.sug { color: var(--ink); background: var(--surface); border: 1px solid var(--rule); text-align: left; white-space: normal; max-width: 100%; }
+  .composer .tools button.sug:hover { border-color: var(--accent); color: var(--accent); }
+  .composer .tools button.clear { color: var(--muted); background: transparent; padding: 4px 6px; }
+  .composer .tools .muted { font-size: 12px; color: var(--muted); }
+  /* concept map: the trunk at the top, branches below, your questions shaded */
+  .cmap { font-family: var(--sans); font-size: 13.5px; margin: 4px 0 10px; overflow-x: auto; }
+  .cmap ul { list-style: none; margin: 0; padding: 0 0 0 22px; border-left: 2px solid var(--rule); }
+  .cmap > ul { padding-left: 0; border-left: 0; }
+  .cmap li { position: relative; margin: 6px 0; }
+  .cmap ul ul > li::before { content: ""; position: absolute; left: -22px; top: 13px; width: 16px; border-top: 2px solid var(--rule); }
+  .cmap .node { display: inline-block; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); line-height: 1.35; }
+  .cmap .node.trunk { font-weight: 600; font-size: 14.5px; border-color: var(--accent); color: var(--accent); }
+  .cmap .node.mine { background: var(--hl); color: var(--hl-ink); border-color: transparent; }
+  .composer .inner {
+    pointer-events: auto; max-width: 720px; margin: 0 auto; display: flex; gap: 8px; align-items: center;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 6px 6px 6px 14px; box-shadow: var(--shadow);
+  }
+  .composer input { flex: 1; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: transparent; border: 0; padding: 8px 0; }
+  .composer input::placeholder { color: var(--muted); }
+  .composer input:focus { outline: none; }
+  .composer .send { font-size: 12.5px; font-weight: 600; color: var(--paper); background: var(--ink); border-radius: 8px; padding: 8px 12px; }
+  .composer .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+
+  /* history drawer */
+  .drawer {
+    position: fixed; top: 49px; right: 0; bottom: 0; width: 320px; max-width: 90vw; z-index: 25;
+    background: var(--surface); border-left: 1px solid var(--rule); display: flex; flex-direction: column;
+    box-shadow: var(--shadow);
+  }
+  .drawer header { padding: 14px 16px 10px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; justify-content: space-between; }
+  .drawer header h3 { margin: 0; font-size: 13px; font-weight: 600; }
+  .drawer header .ctx { font-size: 11px; color: var(--muted); }
+  .drawer .list { flex: 1; overflow: auto; padding: 8px 0; }
+  .hitem { display: grid; grid-template-columns: 44px 1fr; gap: 10px; padding: 8px 16px; font-size: 12.5px; align-items: baseline; }
+  .hitem .t { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .hitem .k { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 6px; }
+  .hitem[data-kind="erase"] .k { color: var(--ok); }
+  .hitem[data-kind="ask"] .k { color: var(--accent); }
+  .hitem[data-kind="later"] .k { color: var(--later); }
+  .hitem[data-kind="restore"] .k, .hitem[data-kind="new"] .k { color: var(--ink-2); }
+  .hitem .x { color: var(--ink-2); }
+  .hitem button.link { color: var(--accent); font-size: 11.5px; padding: 0; margin-left: 6px; text-decoration: underline; text-underline-offset: 2px; }
+  .drawer .ctxbox { border-top: 1px solid var(--rule); padding: 12px 16px; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  .drawer .ctxbox b { color: var(--ink); }
+  .drawer .empty { padding: 24px 16px; color: var(--muted); font-size: 12.5px; }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 40;
+    background: var(--ink); color: var(--paper); font-family: var(--sans); font-size: 13px;
+    padding: 9px 12px 9px 14px; border-radius: 8px; box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center;
+  }
+  .toast button { color: var(--hl); font-weight: 600; padding: 2px 4px; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">Clean Chat <span class="sub">interactive mockup</span></div>
+    <div class="spacer"></div>
+    <button class="barbtn" id="histBtn" aria-pressed="false">History<b id="histCount">0</b></button>
+  </header>
+
+  <main class="page">
+    <div class="column">
+      <div class="hint">
+        <span>Hover a paragraph: <b>✓</b> erases it once you understand, <b>?</b> asks about it.</span>
+        <span>Hover the title or a "You asked" card: <b>✓</b> erases the whole question and answer.</span>
+        <span><b>later</b> parks something that isn't central right now; it stays visible in violet so you can come back.</span>
+        <span>Select any phrase to ask about just that.</span>
+        <span><kbd>e</kbd> understood · <kbd>l</kbd> later · <kbd>a</kbd> ask · <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>⌘Z</kbd> undo</span>
+      </div>
+      <div class="title-row" id="titleRow"><h1 class="doc-title" id="docTitle"></h1><div class="turnbtns"><button class="gbtn got" id="titleGot" title="Mark the whole answer understood">✓</button><button class="gbtn later sec" id="titleLater" title="Park the whole answer to revisit later">later</button></div><div class="title-ghost"><span class="gtext">understood · whole answer</span><span class="restore">restore</span></div></div>
+      <div class="doc-meta" id="docMeta"></div>
+      <article id="docRoot" aria-live="polite"></article>
+    </div>
+  </main>
+
+  <aside class="drawer" id="drawer" hidden aria-label="History">
+    <header><h3>History</h3><span class="ctx" id="histSub">nothing yet</span></header>
+    <div class="list" id="histList"><div class="empty">Every erase, question and restore lands here, newest first. Erased passages can be brought back from this list.</div></div>
+    <div class="ctxbox" id="ctxbox"></div>
+  </aside>
+
+  <footer class="composer">
+    <div class="tools" id="tools" hidden></div>
+    <div class="inner">
+      <span class="label">New section</span>
+      <input id="composer" type="text" placeholder="Ask something not tied to a passage… it's appended as a new section, not a bubble" autocomplete="off">
+      <button class="send" id="sendBtn">Ask</button>
+    </div>
+  </footer>
+
+  <div class="seltool" id="seltool" hidden role="toolbar" aria-label="Selection actions">
+    <button class="primary" data-act="ask">Ask about this</button>
+    <button data-act="mark">Highlight</button>
+    <button data-act="simpler">Simpler</button>
+    <button data-act="example">Example</button>
+  </div>
+
+  <div class="toast" id="toast" hidden><span id="toastText"></span><button id="toastUndo">Undo</button></div>
+</div>
+
+<script type="application/json" id="page-data">{"title":"How Spotify's PKCE login works","blocks":[{"id":"h1","type":"h2","html":"What PKCE is for"},{"id":"p1","type":"p","html":"PKCE (Proof Key for Code Exchange) lets an app that cannot keep a secret, such as a static web page or a phone app, run the OAuth authorization-code flow safely. Instead of a client secret, the app proves it started the login by presenting a one-time secret it generated itself.","simpler":"Normally an app proves who it is with a password-like client secret. A browser page cannot hide a secret, because anyone can view source. PKCE replaces that secret with a fresh random string the app invents for each login and proves it knows at the end.","example":"Freestyle Log is a static page with no server to hold a secret, so it uses PKCE: the page invents the verifier, Spotify sees only its hash, and the page proves ownership when it trades the code for a token.","answer":"PKCE was standardized in RFC 7636 in 2015 for mobile apps. The OAuth 2.1 draft now recommends it for every client, including servers that could hold a secret, because it also blocks authorization-code injection."},{"id":"h2","type":"h2","html":"The four steps"},{"id":"p2","type":"p","step":"1","html":"Before redirecting, your app generates a random string called the <code>code_verifier<\/code> (43 to 128 characters from the unreserved URL set). It hashes the verifier with SHA-256 and base64url-encodes the digest. That encoded hash is the <code>code_challenge<\/code>.","simpler":"Make a long random password. Run it through SHA-256. Encode the hash in a URL-safe way. The random password is the verifier; the encoded hash is the challenge.","example":"verifier: dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk → challenge (S256): E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM. That is the worked pair from the RFC itself.","answer":"Base64url is base64 with + and / swapped for - and _, and the trailing = padding removed, so the value survives inside a URL. In the browser: btoa(String.fromCharCode(...bytes)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'')."},{"id":"p3","type":"p","step":"2","html":"Your app sends the user to Spotify's authorize endpoint with <code>client_id<\/code>, <code>redirect_uri<\/code>, <code>scope<\/code>, <code>code_challenge<\/code>, and <code>code_challenge_method=S256<\/code>. The verifier stays in your app, typically in <code>sessionStorage<\/code>.","simpler":"You build a URL with your app's id, where to come back to, what permissions you want, and the hashed secret. Then you send the browser there.","example":"https://accounts.spotify.com/authorize?client_id=…&response_type=code&redirect_uri=http://127.0.0.1:5173/callback&scope=user-read-recently-played&code_challenge_method=S256&code_challenge=E9Me…","answer":"sessionStorage is the right home for the verifier: it survives the redirect round-trip in the same tab and is cleared when the tab closes. localStorage also works but lingers across sessions."},{"id":"p4","type":"p","step":"3","html":"The user approves. Spotify redirects back to your <code>redirect_uri<\/code> with a short-lived authorization code in the query string.","simpler":"Spotify sends the user back to your page with a temporary ticket in the URL.","example":"http://127.0.0.1:5173/callback?code=AQD…&state=xyz. Read code from window.location.search, then remove it from the URL with history.replaceState so a reload does not try to reuse it.","answer":"The code is single-use and expires within minutes. The state parameter is separate from PKCE: it is a random value you compare on return to block cross-site request forgery."},{"id":"p5","type":"p","step":"4","html":"Your app POSTs to the token endpoint with the code, the same <code>redirect_uri<\/code>, <code>client_id<\/code>, and the original <code>code_verifier<\/code>. Spotify hashes the verifier and compares it with the challenge from step 2. If they match, it returns an access token and a refresh token.","simpler":"You hand back the ticket plus the original random password. Spotify hashes the password, sees it matches the hash from earlier, and gives you tokens.","example":"POST https://accounts.spotify.com/api/token, Content-Type application/x-www-form-urlencoded: grant_type=authorization_code&code=…&redirect_uri=…&client_id=…&code_verifier=dBjf…","answer":"The redirect_uri must match step 2 byte for byte, including trailing slashes and http versus https. That mismatch is the most common cause of invalid_grant."},{"id":"h3","type":"h2","html":"Why it is safe without a secret"},{"id":"p6","type":"p","html":"An attacker who intercepts the authorization code cannot redeem it, because they never saw the verifier. The challenge travelled in the clear, but SHA-256 cannot be reversed to recover the verifier from it.","simpler":"The hash went over the wire, the password never did. Seeing a hash does not let you work backwards to the password.","example":"Suppose a malicious app on the same phone catches the redirect and grabs the code. It sends the code to Spotify, but it has no verifier. Spotify rejects the exchange.","answer":"PKCE defends against authorization-code interception. It does not by itself protect the tokens once you hold them: keep access tokens out of URLs and away from third-party scripts."},{"id":"h4","type":"h2","html":"Tokens after login"},{"id":"p7","type":"p","html":"Access tokens expire after one hour. Use the refresh token to get a new one without sending the user through login again. For PKCE clients Spotify returns a new refresh token with each refresh, so always store the newest one.","simpler":"The pass you get lasts an hour. Instead of logging in again, you show the refresh ticket and get a fresh pass.","example":"POST /api/token with grant_type=refresh_token&refresh_token=…&client_id=…. Store both the new access_token and the new refresh_token from the response.","answer":"Refresh before expiry rather than after: schedule a refresh at expires_in minus 60 seconds, or refresh lazily on the first 401 and retry the request once."},{"id":"p8","type":"p","html":"If the token request returns <code>400 invalid_grant<\/code>, the verifier did not match or the code expired. Regenerate the verifier and start the flow over rather than retrying the exchange.","simpler":"If Spotify says invalid_grant, that login attempt is dead. Start a brand new one instead of retrying.","example":"Response: {\"error\":\"invalid_grant\",\"error_description\":\"Invalid authorization code\"}. Clear sessionStorage, generate a new verifier, redirect again.","answer":"Three causes cover almost every invalid_grant: the code was already used, the code expired, or the redirect_uri differs from the one in step 2."}],"meta":"Example answer, pre-loaded so the interactions can be tried. Follow-up answers here are canned; the real app streams them from the model."}</script>
+<script>
+(function () {
+  // ---------- example content: something Trista has actually built ----------
+  const DOC = JSON.parse(document.getElementById("page-data").textContent);
+
+  // ---------- state ----------
+  const READER = DOC.reader || null;                       // set when the page was built from a Claude Code session
+  const RKEY = READER ? "cleanchat:reader:" + READER.session : null;
+  const BRIDGE = { id: document.documentElement.dataset.ccBridge || "" };   // set by the Clean Chat extension's bridge script when it is on this page
+  const state = { history: [], undo: [], threadSeq: 0, newSeq: 0, erasedIds: new Set(), hl: [], asks: [] };
+  const $ = (s, r = document) => r.querySelector(s);
+  const root = $("#docRoot");
+  const blocksById = new Map();
+
+  // ---------- render ----------
+  $("#docTitle").textContent = DOC.title;
+  $("#docMeta").textContent = DOC.meta || "";
+  DOC.blocks.forEach(b => root.appendChild(renderBlock(b)));
+  $("#titleGot").addEventListener("click", () => eraseTurn("title"));
+  $("#titleLater").addEventListener("click", () => eraseTurn("title", "later"));
+  $("#titleRow .title-ghost").addEventListener("click", () => restoreTurn("title"));
+
+  function renderBlock(b) {
+    blocksById.set(b.id, b);
+    const el = document.createElement("section");
+    el.className = "blk"; el.dataset.id = b.id; el.dataset.type = b.type; el.tabIndex = 0;
+
+    const gutter = document.createElement("div"); gutter.className = "gutter";
+    if (b.type === "h2") {
+      gutter.innerHTML = '<button class="gbtn got" title="Mark the whole section understood">✓</button><button class="gbtn later sec" title="Park this section for later (l)">later</button>';
+      gutter.querySelector(".got").addEventListener("click", () => eraseSection(b.id));
+      gutter.querySelector(".later").addEventListener("click", () => eraseSection(b.id, "later"));
+    } else if (b.type === "ask") {
+      gutter.innerHTML = '<button class="gbtn got" title="Mark this question and its whole answer understood">✓</button><button class="gbtn later sec" title="Park this question and answer for later (l)">later</button>';
+      gutter.querySelector(".got").addEventListener("click", () => eraseTurn(b.id));
+      gutter.querySelector(".later").addEventListener("click", () => eraseTurn(b.id, "later"));
+    } else {
+      gutter.innerHTML = '<button class="gbtn got" title="Got it (e)">✓</button><button class="gbtn ask" title="Ask about this paragraph (a)">?</button><button class="gbtn later" title="Not central right now — park it for later (l)">later</button>';
+      gutter.querySelector(".got").addEventListener("click", () => erase(b.id));
+      gutter.querySelector(".later").addEventListener("click", () => erase(b.id, { why: "later" }));
+      gutter.querySelector(".ask").addEventListener("click", () => openAsk(b.id));
+    }
+    if (READER && READER.notesEndpoint && b.type !== "h2") {
+      const nb = document.createElement("button"); nb.className = "gbtn notes"; nb.textContent = "notes";
+      nb.title = b.type === "ask" ? "Save this question and its answer to your notes doc" : "Save this paragraph, with its question, to your notes doc";
+      nb.addEventListener("click", () => sendNote(b.id)); gutter.appendChild(nb);
+    }
+    addSaveButton(gutter, b);
+    el.appendChild(gutter);
+
+    const body = document.createElement("div"); body.className = "body";
+    if (b.type === "h2") body.innerHTML = `<h2>${b.html}</h2>`;
+    else if (b.type === "h3") body.innerHTML = `<h3>${b.html}</h3>`;
+    else if (b.type === "code") body.innerHTML = `<pre><code>${b.html}</code></pre>`;
+    else if (b.type === "li") body.innerHTML = `<p class="li">${b.marker ? `<span class="marker">${b.marker}</span>` : ""}${b.html}</p>`;
+    else if (b.type === "quote") body.innerHTML = `<p class="quote-blk">${b.html}</p>`;
+    else if (b.type === "ask") body.innerHTML = `<p class="asked"><span class="asked-label">You asked</span>${b.html}</p>`;
+    else body.innerHTML = `<p>${b.step ? `<span class="stepnum">STEP ${b.step}</span>` : ""}${b.html}</p>`;
+    el.appendChild(body);
+
+    const threads = document.createElement("div"); threads.className = "threads";
+    el.appendChild(threads);
+
+    const ghost = document.createElement("div"); ghost.className = "ghost";
+    ghost.innerHTML = `<span class="gtext">${plain(b.html)}</span><span class="restore">restore</span>`;
+    ghost.addEventListener("click", () => el.classList.contains("turn") ? restoreTurn(b.id) : restore(b.id));
+    el.appendChild(ghost);
+    return el;
+  }
+  function plain(html) { const d = document.createElement("div"); d.innerHTML = html; return d.textContent; }
+  function blockEl(id) { return root.querySelector(`.blk[data-id="${id}"]`); }
+
+  // ---------- erase / restore ----------
+  function erase(id, opts = {}) {
+    const el = blockEl(id); if (!el || el.classList.contains("erased")) return;
+    el.classList.add("erased"); el.classList.toggle("later", opts.why === "later"); state.erasedIds.add(id);
+    if (!opts.silent) {
+      state.undo.push({ type: "erase", ids: [id] });
+      log(opts.why === "later" ? "later" : "erase", plain(blocksById.get(id).html));
+      toast(opts.why === "later" ? "Parked for later" : "Marked as understood", () => undo());
+    }
+    updateProgress();
+  }
+  function eraseSection(hid, why) {
+    const ids = [];
+    let el = blockEl(hid);
+    while (el) {
+      if (el !== blockEl(hid) && (el.dataset.type === "h2" || el.dataset.type === "ask")) break;
+      if (!el.classList.contains("erased")) { ids.push(el.dataset.id); el.classList.add("erased"); el.classList.toggle("later", why === "later"); state.erasedIds.add(el.dataset.id); }
+      el = el.nextElementSibling;
+    }
+    if (!ids.length) return;
+    state.undo.push({ type: "erase", ids });
+    log(why === "later" ? "later" : "erase", `section “${plain(blocksById.get(hid).html)}” (${ids.length} blocks)`);
+    toast(why === "later" ? "Section parked for later" : "Section marked as understood", () => undo());
+    updateProgress();
+  }
+  function restore(id, opts = {}) {
+    const el = blockEl(id); if (!el || !el.classList.contains("erased")) return;
+    el.classList.remove("erased", "later"); state.erasedIds.delete(id);
+    if (!opts.silent) { log("restore", plain(blocksById.get(id).html)); }
+    updateProgress();
+    if (!opts.silent) el.focus();
+  }
+  function undo() {
+    const u = state.undo.pop(); if (!u) return;
+    if (u.type === "turn") { restoreTurn(u.id); hideToast(); return; }
+    if (u.type === "erase") u.ids.forEach(id => restore(id, { silent: true }));
+    if (u.type === "thread-erase") { const t = document.querySelector(`.thread[data-tid="${u.tid}"]`); if (t) t.classList.remove("erased"); }
+    log("restore", u.type === "erase" ? `${u.ids.length} block${u.ids.length > 1 ? "s" : ""} (undo)` : "follow-up (undo)");
+    hideToast(); updateProgress();
+  }
+
+  // ---------- question + answer level ----------
+  function turnBlocks(startId) {
+    const all = [...root.querySelectorAll(".blk")];
+    const i = startId === "title" ? 0 : all.findIndex(b => b.dataset.id === startId);
+    if (i < 0) return [];
+    const out = [];
+    for (let j = i; j < all.length; j++) {
+      if (all[j].dataset.type === "ask" && (startId === "title" || j > i)) break;
+      out.push(all[j]);
+    }
+    return out;
+  }
+  function turnLabel(startId) { return startId === "title" ? DOC.title : plain(blocksById.get(startId).html); }
+  function eraseTurn(startId, why, opts = {}) {
+    const blocks = turnBlocks(startId); if (!blocks.length) return;
+    const later = why === "later";
+    blocks.forEach(b => { if (b.dataset.id !== startId) b.classList.add("erased", "hiddenblk"); });
+    if (startId === "title") { $("#titleRow").classList.add("erased"); $("#titleRow").classList.toggle("later", later); $("#titleRow .title-ghost .gtext").textContent = (later ? "later" : "understood") + " · whole answer"; }
+    else { const s = blockEl(startId); s.classList.add("erased", "turn"); s.classList.toggle("later", later); s.querySelector(".ghost .gtext").textContent = "whole answer · " + turnLabel(startId); }
+    closeAsk();
+    if (!opts.silent) {
+      state.undo.push({ type: "turn", id: startId });
+      log(later ? "later" : "erase", "whole answer: " + turnLabel(startId));
+      toast(later ? "Question and answer parked for later" : "Question and answer marked as understood", () => undo());
+    }
+    updateProgress();
+  }
+  function restoreTurn(startId) {
+    turnBlocks(startId).forEach(b => { if (b.dataset.id !== startId) { b.classList.remove("hiddenblk"); if (!state.erasedIds.has(b.dataset.id)) b.classList.remove("erased"); } });
+    if (startId === "title") $("#titleRow").classList.remove("erased", "later");
+    else { const s = blockEl(startId); s.classList.remove("erased", "turn", "later"); s.querySelector(".ghost .gtext").textContent = turnLabel(startId); }
+    log("restore", "whole answer: " + turnLabel(startId));
+    updateProgress();
+  }
+
+  // ---------- ask (anchored follow-ups) ----------
+  // `parent` is the key (its time stamp) of an answer given on this page: the question is then about that answer,
+  // and the new answer nests under it, so an explanation can be explained again, as many times as needed
+  const threadEl = key => key ? root.querySelector(`.thread[data-key="${key}"]`) : null;
+  function threadsOf(host) { let t = host.querySelector(":scope > .threads"); if (!t) { t = document.createElement("div"); t.className = "threads"; host.appendChild(t); } return t; }
+  function chainOf(key) { const out = []; let k = key; for (let i = 0; k && i < 8; i++) { const a = state.asks.find(x => String(x.t) === String(k)); if (!a) break; out.unshift(a); k = a.parent; } return out; }
+  function openAsk(id, quote, parent) {
+    closeAsk();
+    const el = blockEl(id); if (!el) return;
+    const host = (parent && threadEl(parent)) || el;
+    const box = document.createElement("div"); box.className = "askbox";
+    box.innerHTML = `${quote ? `<span class="chip" title="${escapeAttr(quote)}">“${escapeHtml(quote)}”</span>` : ""}
+      <input type="text" placeholder="${quote ? "Ask about the highlighted phrase…" : parent ? "Ask further about this answer…" : "Ask about this paragraph…"}" autocomplete="off">
+      <div class="quick"><button data-q="simpler">Explain simpler</button><button data-q="example">Give an example</button><button class="cancel" data-q="cancel">Cancel</button>${LIVE ? scopeToggle() : ""}</div>`;
+    threadsOf(host).appendChild(box);
+    wireScope(box);
+    const input = box.querySelector("input");
+    input.focus();
+    input.addEventListener("keydown", e => {
+      if ((e.key === "Enter" || e.key === "Return") && input.value.trim()) { ask(id, input.value.trim(), "answer", quote, parent); closeAsk(); }
+      if (e.key === "Escape") { closeAsk(); el.focus(); }
+    });
+    box.querySelectorAll(".quick button").forEach(btn => btn.addEventListener("click", () => {
+      const q = btn.dataset.q;
+      if (q === "cancel") { closeAsk(); el.focus(); return; }
+      ask(id, q === "simpler" ? "Explain this more simply" : "Give me a concrete example", q, quote, parent);
+      closeAsk();
+    }));
+  }
+  function closeAsk() { document.querySelectorAll(".askbox").forEach(b => b.remove()); }
+
+  function ask(id, question, kind, quote, parent) {
+    if (READER) return askInClaudeCode(id, question, kind, quote, parent);
+    const b = blocksById.get(id); const el = blockEl(id);
+    const tid = "t" + (++state.threadSeq);
+    const t = document.createElement("div"); t.className = "thread"; t.dataset.tid = tid;
+    t.innerHTML = `<div class="tq"><span class="who">You</span>${quote ? `<span class="quote">${escapeHtml(quote)}</span>` : ""}<span>${escapeHtml(question)}</span></div>
+      <div class="ta"><span class="caret"></span></div>
+      <div class="tactions"><button class="tgot" title="Got it">✓ Got it</button><button class="tmore">Ask further</button></div>`;
+    el.querySelector(".threads").appendChild(t);
+    log("ask", (quote ? `“${quote}”: ` : "") + question);
+    const text = b[kind] || b.answer || "Mock answer. In the real app the model replies here, using the page and this passage as context, and this note is itself erasable once understood.";
+    stream(t.querySelector(".ta"), (quote && kind === "answer") ? `On “${quote}”: ${text}` : text);
+    t.querySelector(".tgot").addEventListener("click", () => {
+      t.classList.add("erased"); state.undo.push({ type: "thread-erase", tid });
+      log("erase", `follow-up: ${question}`); toast("Follow-up marked as understood", () => undo()); updateProgress();
+    });
+    t.querySelector(".tmore").addEventListener("click", () => openAsk(id));
+    updateProgress();
+  }
+  // ---------- reader mode: this page sits beside Claude Code, so asking means handing it a ready-made prompt
+  async function copyText(text, msg) {
+    try { await navigator.clipboard.writeText(text); }
+    catch (_) { const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.remove(); }
+    toast(msg);
+  }
+  // Served by the reader's own server, a question is answered right here: the server puts it to a forked copy of
+  // this session, so Claude answers with the whole session in mind and the session itself is left as it was.
+  // Opened as a plain file, or when the server cannot answer, the old way: a ready prompt is copied for Claude Code.
+  const LIVE = !!READER && location.protocol.startsWith("http") && /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+  // What an answer is allowed to read. "passage": a fresh run given only this passage with its question and answer,
+  // about a short session's worth of tokens. "session": a fork of the whole session, which re-reads all of it.
+  const SCOPE_KEY = "cleanchat:reader:scope";
+  const scope = () => { try { return localStorage.getItem(SCOPE_KEY) === "session" ? "session" : "passage"; } catch (_) { return "passage"; } };
+  function scopeToggle() { return `<label class="scope" title="Off: the answer is given only this passage, its question and its answer (cheap). On: a forked copy of the whole session answers, which re-reads everything in it (costs about one more step of the session)."><input type="checkbox" class="scopeAll"${scope() === "session" ? " checked" : ""}> with the whole session</label>`; }
+  function wireScope(host) { host.querySelectorAll(".scopeAll").forEach(cb => cb.addEventListener("change", () => { try { localStorage.setItem(SCOPE_KEY, cb.checked ? "session" : "passage"); } catch (_) {} document.querySelectorAll(".scopeAll").forEach(o => { o.checked = cb.checked; }); })); }
+  function turnOf(id) {                          // the question this paragraph answers, and that whole answer
+    let q = id ? blockEl(id) : null; while (q && q.dataset.type !== "ask") q = q.previousElementSibling;
+    const b = q && blocksById.get(q.dataset.id); if (!b) return null;
+    return { question: b.question || plain(b.html), answer: (b.answerMd || "").slice(0, 8000) };
+  }
+  function promptFor(id, question, kind, quote, parent) {
+    const about = quote || (id && !parent ? plain(blocksById.get(id).html).slice(0, 220) : "");
+    if (quote && quote.includes("\n")) return (kind === "simpler" ? "Explain this more simply:" : kind === "example" ? "Give me a concrete example of this:" : question + "\n\nAbout this part:") + "\n\n" + quote;   // code: keep its lines
+    if (!about && parent) return kind === "simpler" ? "Explain the answer above more simply" : kind === "example" ? "Give me a concrete example of the answer above" : question;
+    return kind === "simpler" ? `Explain this more simply: "${about}"` : kind === "example" ? `Give me a concrete example of this: "${about}"` : about ? `Re: "${about}"\n\n${question}` : question;
+  }
+  function askInClaudeCode(id, question, kind, quote, parent) {
+    if (LIVE) return askLive(id, question, kind, quote, parent);
+    copyAsk(id, question, kind, quote);
+  }
+  function renderMd(md) {                          // the little markdown an answer uses: paragraphs, lists, code, bold
+    const inl = t => escapeHtml(t).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+    const lines = md.replace(/\r/g, "").split("\n"), out = []; let i = 0;
+    const isList = l => /^\s*[-*•]\s+/.test(l), isNum = l => /^\s*\d+[.)]\s+/.test(l);
+    while (i < lines.length) {
+      const l = lines[i];
+      if (/^```/.test(l)) { const buf = []; i++; while (i < lines.length && !/^```/.test(lines[i])) buf.push(lines[i++]); i++; out.push(`<pre><code>${escapeHtml(buf.join("\n"))}</code></pre>`); continue; }
+      if (isList(l)) { const items = []; while (i < lines.length && isList(lines[i])) items.push(lines[i++].replace(/^\s*[-*•]\s+/, "")); out.push(`<ul>${items.map(x => `<li>${inl(x)}</li>`).join("")}</ul>`); continue; }
+      if (isNum(l)) { const items = []; while (i < lines.length && isNum(lines[i])) items.push(lines[i++].replace(/^\s*\d+[.)]\s+/, "")); out.push(`<ol>${items.map(x => `<li>${inl(x)}</li>`).join("")}</ol>`); continue; }
+      if (/^#{1,6}\s/.test(l)) { out.push(`<p><b>${inl(l.replace(/^#+\s*/, ""))}</b></p>`); i++; continue; }
+      if (!l.trim()) { i++; continue; }
+      const buf = [l]; i++;
+      while (i < lines.length && lines[i].trim() && !/^(```|#{1,6}\s)/.test(lines[i]) && !isList(lines[i]) && !isNum(lines[i])) buf.push(lines[i++]);
+      out.push(`<p>${inl(buf.join(" "))}</p>`);
+    }
+    return out.join("");
+  }
+  function threadShell(id, question, quote, live, key, parent) {
+    const t = document.createElement("div"); t.className = "thread" + (live ? " live" : ""); t.dataset.tid = "t" + (++state.threadSeq); if (key) t.dataset.key = key;
+    t.innerHTML = `<div class="tq"><span class="who">You</span>${quote ? `<span class="quote">${escapeHtml(quote)}</span>` : ""}<span>${escapeHtml(question)}</span></div>
+      <div class="ta"></div><div class="tmeta"></div>
+      <div class="tactions"><button class="tgot" title="Got it">✓ Got it</button><button class="tmore">Ask further</button><button class="tcopy" hidden>Copy the prompt instead</button></div>`;
+    threadsOf((parent && threadEl(parent)) || blockEl(id)).appendChild(t);
+    return t;
+  }
+  function liveBlocks(entry, scroll) {              // a question from the box at the bottom becomes a real question-and-answer on the page
+    const n = entry.t.toString(36);
+    const h = { id: `la${n}`, type: "ask", html: escapeHtml(entry.question).replace(/\n/g, "<br>"), question: entry.question, answerMd: entry.answer || "" };
+    const p = { id: `lp${n}`, type: "p", html: renderAnswer(entry) };
+    const hEl = renderBlock(h), pEl = renderBlock(p); root.appendChild(hEl); root.appendChild(pEl);
+    if (scroll) hEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    return { body: pEl.querySelector(".body"), h, p };
+  }
+  function finishThread(t, entry) {
+    t.classList.remove("live");
+    const k = entry.tokens || {}, total = (k.input || 0) + (k.cache_read || 0) + (k.cache_write || 0);
+    t.querySelector(".tmeta").textContent = (entry.scope === "session" ? "Answered by a forked copy of this session" : "Answered from this passage, its question and its answer only") + (total ? ` · read ${Math.round(total / 1000)}k tokens${k.cache_read > total * 0.7 ? ", mostly from cache" : ""}` : "") + (entry.ms ? ` · ${Math.max(1, Math.round(entry.ms / 1000))} s` : "") + (entry.stopped ? " · stopped early" : "");
+    const more = t.querySelector(".tmore"); more.textContent = "Ask further"; more.onclick = () => openAsk(entry.id, undefined, entry.t);
+    t.querySelector(".tgot").onclick = () => { t.classList.add("erased"); entry.done = true; persist(); toast("Follow-up marked as understood", () => { t.classList.remove("erased"); entry.done = false; persist(); }); };
+  }
+  // While an answer is being written above the part of the page you are reading, the text you are reading would be
+  // pushed down with every word. So every change to a streaming answer keeps whatever sits at the top of the window
+  // where it is, unless that is the answer itself (then you are watching it being written).
+  let carry = 0;
+  let readY = null;                                        // where you are reading: the mouse, when it is over the page
+  document.addEventListener("mousemove", e => { readY = e.clientY; }, { passive: true });
+  document.documentElement.addEventListener("mouseleave", () => { readY = null; });
+  function stable(target, fn) {
+    const bar = document.querySelector("header.bar"); const barB = bar ? bar.getBoundingClientRect().bottom : 0;
+    const y = readY != null && readY > barB + 4 && readY < innerHeight - 80 ? readY : Math.max(barB + 4, innerHeight / 2);
+    const tr = target.getBoundingClientRect();
+    if (tr.top >= y || tr.bottom >= y) { fn(); return; }     // the answer is below you, or you are looking at it: let it grow
+    let a = null;                                            // the first paragraph or follow-up below the top edge, outside the answer
+    for (const e of root.querySelectorAll(".blk, .thread, .blk > .body > *")) {
+      if (e === target || target.contains(e) || e.contains(target)) continue;
+      const r = e.getBoundingClientRect(); if (r.height && r.bottom > y && r.top > tr.top) { a = e; break; }
+    }
+    const before = a ? a.getBoundingClientRect().top : target.getBoundingClientRect().bottom;
+    fn();
+    const want = (a ? a.getBoundingClientRect().top : target.getBoundingClientRect().bottom) - before + carry;
+    const d = Math.round(want); carry = want - d;                   // the window scrolls whole pixels: carry the fraction, or it adds up
+    if (d) scrollBy({ top: d, left: 0, behavior: "instant" });
+  }
+  async function askLive(id, question, kind, quote, parent) {
+    const asked = kind === "simpler" ? "Explain this more simply" : kind === "example" ? "Give me a concrete example" : kind === "gaps" ? "Where are my gaps? The big picture behind what I have been asking on this page" : kind === "map" ? "A map of the concepts I am struggling with: the trunk, the branches, and where my questions sit" : question;
+    const entry = { id: id || null, quote: quote || "", question: asked, answer: "", t: Date.now() };
+    if (kind === "gaps" || kind === "map") entry.kind = kind;
+    const above = parent ? chainOf(parent) : [];                      // the answers this question builds on, nearest last
+    if (above.length) entry.parent = above[above.length - 1].t;
+    let t = null, target, made = null;
+    if (id) { stable(blockEl(id), () => { t = threadShell(id, asked, quote, true, entry.t, entry.parent); }); target = t.querySelector(".ta"); }
+    else { made = liveBlocks(entry, true); target = made.body; }
+    stable(target, () => { target.innerHTML = '<span class="thinking">Thinking…</span>'; });
+    log("ask", (quote ? `“${quote}”: ` : "") + asked);
+    const ctl = new AbortController(); state.inflight = (state.inflight || 0) + 1;
+    if (t) { const b = t.querySelector(".tmore"); b.textContent = "Stop"; b.onclick = () => ctl.abort(); }
+    const context = above.length ? "" : id ? plain(blocksById.get(id).html).slice(0, 1500) : "";
+    entry.scope = scope();
+    const prompt = kind === "answer" ? question : kind === "gaps" ? GAPS_PROMPT : kind === "map" ? MAP_PROMPT : promptFor(id, question, kind, quote, entry.parent);
+    let text = "";
+    const keep = () => { entry.answer = text; stable(target, () => { target.innerHTML = renderAnswer(entry); if (t) finishThread(t, entry); }); if (made) { made.p.html = target.innerHTML; made.h.answerMd = text; } state.asks.push(entry); persist(); };
+    try {
+      const res = await fetch("/ask", { method: "POST", headers: { "Content-Type": "application/json", "X-CC-Ask": "1" }, signal: ctl.signal,
+        body: JSON.stringify({ session: READER.session, question: prompt, quote: quote || "", context, scope: entry.scope, turn: turnOf(id), thread: above.map(a => ({ q: a.question, a: a.answer })), digest: id ? undefined : digest() }) });
+      if (!res.ok) throw new Error((await res.text()).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 200) || ("HTTP " + res.status));
+      const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
+      for (;;) {
+        const { value, done } = await rd.read(); if (done) break;
+        buf += dec.decode(value, { stream: true }); let nl;
+        while ((nl = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, nl); buf = buf.slice(nl + 1); if (!line.trim()) continue;
+          let ev; try { ev = JSON.parse(line); } catch (_) { continue; }
+          if (ev.delta) { text += ev.delta; stable(target, () => { target.innerHTML = renderMd(text) + '<span class="caret"></span>'; }); }
+          else if (ev.error) throw new Error(ev.error);
+          else if (ev.done) { entry.fork = ev.fork; entry.tokens = ev.tokens; entry.ms = ev.ms; }
+        }
+      }
+      if (!text.trim()) throw new Error("No answer came back");
+      keep();
+    } catch (e) {
+      const stopped = e.name === "AbortError";
+      if (stopped && text.trim()) { entry.stopped = true; keep(); return; }
+      const msg = String(e.message || e);
+      const why = /401|authenticat|OAuth/i.test(msg) ? "The <code>claude</code> command's sign-in is no longer valid, so the reader cannot ask for you (the app you are chatting in signs in separately). In Terminal, run <code>claude</code> and send any message: opening it alone checks nothing. If that message fails too, run <code>/login</code> there, then try here again. (" + escapeHtml(msg) + ")" : "Couldn't ask from here: " + escapeHtml(msg);
+      stable(target, () => { target.innerHTML = `<span class="muted">${stopped ? "Stopped." : why}</span>`; });
+      if (t) {
+        t.classList.remove("live");
+        const c = t.querySelector(".tcopy"); c.hidden = false; c.onclick = () => copyText(promptFor(id, question, kind, quote, entry.parent), "Copied. Paste it into Claude Code.");
+        const b = t.querySelector(".tmore"); b.textContent = "Try again"; b.onclick = () => { t.remove(); askLive(id, question, kind, quote, entry.parent); };
+        t.querySelector(".tgot").onclick = () => t.remove();
+      }
+    } finally { state.inflight--; }
+  }
+  // ---------- page-level questions know what you did on the page ----------
+  // A question from the box at the bottom, the suggestions and the "gaps" introduction are all given a digest of your
+  // marks: what you highlighted, what you asked (with the answers), what you parked for later, how much is understood.
+  const SUGGEST_PROMPT = "From what I highlighted, asked about and parked for later on this page, suggest five questions I should ask next to understand this better, in the order to ask them. One question per line, each under 20 words, no numbering, no preamble, nothing else.";
+  const GAPS_PROMPT = "From what I highlighted, asked about, asked to have explained more simply, and parked for later on this page, give me a big-picture introduction to the context I seem to be missing: the ideas underneath my questions, how they connect to each other and to the answer on this page, and what to understand first. Plain prose in short paragraphs, no headings, no preamble. If my questions show no gap, say what they do show instead.";
+  const MAP_PROMPT = "From what I highlighted, asked about and parked for later on this page, draw a map of the concepts I am struggling with, as a tree: the trunk is the one idea everything here hangs on; the branches are the main concepts under it; the twigs are the specific points my questions touch. Give it as an indented outline: one item per line starting with '- ', two more spaces of indentation per level, the trunk as the single top item, at most 4 levels and 25 items, each item under 10 words. Mark an item that one of my questions touches by ending that line with ' ← asked'. After the outline, one blank line, then two sentences on how to read the map: which branch to understand first and why. Nothing else.";
+  // the map comes back as an indented outline and is drawn as a tree; anything after it is ordinary text
+  function inlineMd(s) { return escapeHtml(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
+  function renderMap(md) {
+    const lines = String(md || "").replace(/\r/g, "").split("\n"), re = /^(\s*)(?:[-*•]|\d+[.)])\s+(.*)$/;
+    const items = []; let i = 0, started = false;
+    for (; i < lines.length; i++) {
+      const m = lines[i].match(re);
+      if (m) { started = true; items.push({ d: Math.round(m[1].replace(/\t/g, "  ").length / 2), text: m[2].trim() }); }
+      else if (started) { if (!lines[i].trim()) break; items[items.length - 1].text += " " + lines[i].trim(); }
+    }
+    if (!items.length) return renderMd(md);
+    const rest = lines.slice(i).join("\n").trim();
+    const askedRe = /\s*(?:←|<-|—|–|-)\s*asked\.?\s*$/i;
+    const node = (it, d) => { const mine = askedRe.test(it.text); const text = it.text.replace(askedRe, "").replace(/^\*\*(.+)\*\*$/, "$1"); return `<span class="node${d === 0 ? " trunk" : ""}${mine ? " mine" : ""}"${mine ? ' title="One of your questions touches this"' : ""}>${inlineMd(text)}</span>`; };
+    let html = "", depth = -1;
+    items.forEach(it => {
+      const d = Math.min(it.d, depth + 1);                  // a jump of two levels counts as one
+      if (d > depth) html += "<ul>"; else { html += "</li>"; for (let k = depth; k > d; k--) html += "</ul></li>"; }
+      html += "<li>" + node(it, d); depth = d;
+    });
+    html += "</li>"; for (let k = depth; k > 0; k--) html += "</ul></li>"; html += "</ul>";
+    return `<div class="cmap">${html}</div>` + (rest ? renderMd(rest) : "") + '<p class="muted" style="font:12px var(--sans);margin:0">Trunk at the top, branches below. Shaded: where your questions sit.</p>';
+  }
+  const renderAnswer = e => e.kind === "map" ? renderMap(e.answer || "") : renderMd(e.answer || "");
+  function digest() {
+    const lines = [];
+    // every question on the page with how its answer opens, the ones you marked understood included (they are still
+    // part of what you have read; understood only hides them from you), so page-level asks know the whole page
+    const turns = [...root.querySelectorAll('.blk[data-type="ask"]')].slice(-30).map(q => {
+      const b = blocksById.get(q.dataset.id) || {}; const done = q.classList.contains("erased") ? " (marked understood)" : "";
+      return `Q${done}: ${(b.question || plain(b.html || "")).slice(0, 300)}\nA: ${(b.answerMd || "").replace(/\s+/g, " ").slice(0, 400)}`;
+    });
+    if (turns.length) lines.push("The questions on this page and how each answer opens:\n" + turns.join("\n"));
+    const hl = state.hl.map(h => h.quote).filter(Boolean);
+    if (hl.length) lines.push("Highlighted: " + hl.slice(0, 40).map(q => `"${q}"`).join("; "));
+    state.asks.slice(-25).forEach(a => lines.push(`Asked${a.quote ? ` about "${a.quote}"` : ""}: ${a.question}` + (a.answer ? `\nAnswer: ${a.answer.slice(0, 600)}` : "")));
+    const later = [...root.querySelectorAll(".blk.erased.later")].map(b => plain((blocksById.get(b.dataset.id) || {}).html || "").slice(0, 160)).filter(Boolean);
+    if (later.length) lines.push("Parked for later: " + later.slice(0, 20).join(" | "));
+    const done = root.querySelectorAll(".blk.erased:not(.later)").length;
+    if (done) lines.push(`${done} paragraph${done === 1 ? "" : "s"} marked as understood.`);
+    return lines.join("\n\n").slice(0, 24000);
+  }
+  function renderSuggest() {
+    const box = $("#suggest"); if (!box) return; const qs = state.suggest || [];
+    box.innerHTML = qs.map(q => `<button type="button" class="sug" title="Put this question in the box below">${escapeHtml(q)}</button>`).join("") + (qs.length ? '<button type="button" class="clear" title="Clear the suggestions">×</button>' : "");
+    box.querySelectorAll(".sug").forEach(b => b.addEventListener("click", () => { composer.value = b.textContent; composer.focus(); }));
+    const c = box.querySelector(".clear"); if (c) c.addEventListener("click", () => { state.suggest = []; persist(); renderSuggest(); });
+  }
+  async function suggest() {
+    const box = $("#suggest"); if (!LIVE || !box || state.suggesting) return;
+    state.suggesting = true; box.innerHTML = '<span class="muted">Thinking about what to ask next…</span>';
+    state.inflight = (state.inflight || 0) + 1;
+    let text = "";
+    try {
+      const res = await fetch("/ask", { method: "POST", headers: { "Content-Type": "application/json", "X-CC-Ask": "1" },
+        body: JSON.stringify({ session: READER.session, question: SUGGEST_PROMPT, scope: scope(), digest: digest() }) });
+      if (!res.ok) throw new Error((await res.text()).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 200) || ("HTTP " + res.status));
+      const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
+      for (;;) {
+        const { value, done } = await rd.read(); if (done) break;
+        buf += dec.decode(value, { stream: true }); let nl;
+        while ((nl = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, nl); buf = buf.slice(nl + 1); if (!line.trim()) continue;
+          let ev; try { ev = JSON.parse(line); } catch (_) { continue; }
+          if (ev.delta) text += ev.delta; else if (ev.error) throw new Error(ev.error);
+        }
+      }
+      const qs = text.split("\n").map(l => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").replace(/\*\*/g, "").trim()).filter(l => l.length > 8 && l.length < 220).slice(0, 6);
+      if (!qs.length) throw new Error("No suggestions came back");
+      state.suggest = qs; persist(); renderSuggest(); log("ask", "asked for suggestions");
+    } catch (e) {
+      box.innerHTML = `<span class="muted">Couldn't get suggestions: ${escapeHtml(String(e.message || e))}</span>`;
+    } finally { state.inflight--; state.suggesting = false; }
+  }
+  function copyAsk(id, question, kind, quote) {
+    const prompt = promptFor(id, question, kind, quote);
+    copyText(prompt, "Copied. Paste it into Claude Code.");
+    const el = blockEl(id); const tid = "t" + (++state.threadSeq);
+    const t = document.createElement("div"); t.className = "thread"; t.dataset.tid = tid;
+    t.innerHTML = `<div class="tq"><span class="who">You</span>${quote ? `<span class="quote">${escapeHtml(quote)}</span>` : ""}<span>${escapeHtml(question)}</span></div>
+      <div class="ta" style="color:var(--muted);font-family:var(--sans);font-size:13px">Copied for Claude Code. Its answer will arrive as a new question at the bottom of this page.</div>
+      <div class="tactions"><button class="tgot">✓ Got it</button><button class="tcopy">Copy again</button></div>`;
+    el.querySelector(".threads").appendChild(t);
+    t.querySelector(".tgot").addEventListener("click", () => { t.remove(); });
+    t.querySelector(".tcopy").addEventListener("click", () => copyText(prompt, "Copied. Paste it into Claude Code."));
+    log("ask", (quote ? `“${quote}”: ` : "") + question);
+    state.asks.push({ id, quote: quote || "", question, t: Date.now() }); persist();
+  }
+  // ---------- save into the extension: the Clean Chat bridge script is on this page and answers postMessage ----------
+  function toMd(html) {                            // a block's html back to the little markdown the saved page renders
+    const d = document.createElement("div"); d.innerHTML = html;
+    const walk = n => {
+      if (n.nodeType === 3) return n.data; if (n.nodeType !== 1) return "";
+      const inner = [...n.childNodes].map(walk).join("");
+      switch (n.tagName) {
+        case "CODE": return "`" + inner + "`"; case "STRONG": case "B": return "**" + inner + "**"; case "EM": case "I": return "*" + inner + "*";
+        case "A": return n.getAttribute("href") ? `[${inner}](${n.getAttribute("href")})` : inner; case "BR": return "\n"; default: return inner;
+      }
+    };
+    return walk(d).replace(/[ \t]+\n/g, "\n").trim();
+  }
+  function blockMd(b) {
+    if (b.type === "code") return "```\n" + plain(b.html) + "\n```";
+    if (b.type === "li") return (b.marker || "-") + " " + toMd(b.html);
+    if (b.type === "quote") return "> " + toMd(b.html);
+    if (b.type === "h2") return "## " + toMd(b.html);
+    if (b.type === "h3") return "### " + toMd(b.html);
+    return toMd(b.html);
+  }
+  function noteFor(id) {                           // what "save" keeps: a whole question and answer, a section, or one paragraph with its question
+    const b = blocksById.get(id); if (!b) return null;
+    const turn = turnOf(id) || { question: "", answer: "" };
+    if (b.type === "ask") return { kind: "turn", question: b.question || plain(b.html), answer: b.answerMd || "" };
+    if (b.type === "h2") {
+      const parts = [blockMd(b)]; let el = blockEl(id).nextElementSibling;
+      while (el && !/^(h2|ask)$/.test(el.dataset.type)) { const nb = blocksById.get(el.dataset.id); if (nb) parts.push(blockMd(nb)); el = el.nextElementSibling; }
+      return { kind: "section", question: turn.question, answer: parts.join("\n\n") };
+    }
+    return { kind: "paragraph", question: turn.question, answer: blockMd(b) };
+  }
+  function saveToExtension(id) {
+    const n = noteFor(id); if (!n || (!n.answer.trim() && !n.question.trim())) { toast("Nothing to save here"); return; }
+    Object.assign(n, { title: DOC.title, session: READER.session, project: READER.project });
+    const rid = Math.random().toString(36).slice(2);
+    const onReply = e => {
+      if (e.source !== window || e.origin !== location.origin || !e.data || e.data.type !== "cleanchat:saved" || e.data.rid !== rid) return;
+      window.removeEventListener("message", onReply); clearTimeout(tm);
+      const s = e.data.status;
+      toast(s === "saved" ? `Saved to Clean Chat (${e.data.count} kept). It is on the extension's saved page.` : s === "already" ? "Already saved in Clean Chat" : s === "updated" ? "Saved note updated with the newer answer" : "Nothing to save here");
+      if (s === "saved" || s === "updated") log("ask", "saved: " + (n.question || n.answer).slice(0, 80));
+    };
+    window.addEventListener("message", onReply);
+    const tm = setTimeout(() => { window.removeEventListener("message", onReply); toast("The extension did not answer. Reload this page and try again."); }, 3000);
+    window.postMessage({ type: "cleanchat:save", rid, note: n }, location.origin);
+  }
+  function addSaveButton(gutter, b) {
+    if (!READER || !BRIDGE.id || !b || /^w/.test(b.id) || gutter.querySelector(".save")) return;
+    const sb = document.createElement("button"); sb.className = "gbtn notes save"; sb.textContent = "save";
+    sb.title = b.type === "ask" ? "Keep this question and its answer in Clean Chat's saved list (s)" : b.type === "h2" ? "Keep this section, with its question, in Clean Chat's saved list (s)" : "Keep this paragraph, with its question, in Clean Chat's saved list (s)";
+    sb.addEventListener("click", () => saveToExtension(b.id)); gutter.appendChild(sb);
+  }
+  function hello() {                               // the page introduces the extension to the server, so the saved page may ask here too
+    if (!LIVE || !/^[a-p]{32}$/.test(BRIDGE.id)) return;
+    fetch("/hello", { method: "POST", headers: { "Content-Type": "application/json", "X-CC-Ask": "1" }, body: JSON.stringify({ ext: BRIDGE.id }) }).catch(() => {});
+  }
+  window.addEventListener("message", e => {        // the extension was (re)loaded after this page: wire up now
+    if (e.source !== window || e.origin !== location.origin || !e.data || e.data.type !== "cleanchat:bridge" || BRIDGE.id) return;
+    BRIDGE.id = e.data.id || "local";
+    root.querySelectorAll(".blk > .gutter").forEach(g => addSaveButton(g, blocksById.get(g.parentElement.dataset.id)));
+    renderHint(); hello();
+  });
+  async function sendNote(id) {
+    const b = blocksById.get(id); if (!b) return;
+    let question, answer, kind;
+    if (b.type === "ask") { kind = "turn"; question = b.question || plain(b.html); answer = b.answerMd || ""; }
+    else { kind = "paragraph"; let q = blockEl(id); while (q && q.dataset.type !== "ask") q = q.previousElementSibling; question = q ? (blocksById.get(q.dataset.id).question || plain(blocksById.get(q.dataset.id).html)) : ""; answer = plain(b.html); }
+    const payload = JSON.stringify({ site: "claude-code", url: "", title: DOC.title, t: Date.now(), kind, question, answer });
+    toast("Saving to your notes doc…");
+    const post = mode => fetch(READER.notesEndpoint, { method: "POST", mode, headers: { "Content-Type": "text/plain;charset=utf-8" }, body: payload, redirect: "follow" });
+    try { const r = await post("cors"); const d = await r.json().catch(() => ({})); toast(d.ok === false ? "Couldn't save: " + d.error : "Saved to notes"); log("ask", "saved to notes: " + question.slice(0, 80)); }
+    catch (_) { try { await post("no-cors"); toast("Sent to your notes doc"); log("ask", "sent to notes: " + question.slice(0, 80)); } catch (e) { toast("Couldn't reach the notes doc"); } }
+  }
+  // your marks survive a refresh: they are saved per Claude Code session, keyed by the text they belong to
+  function persist() {
+    if (!READER) return;
+    const snap = { blocks: {}, turns: {}, hl: state.hl, asks: state.asks, suggest: state.suggest || [] };
+    root.querySelectorAll(".blk.erased").forEach(bk => {
+      const why = bk.classList.contains("later") ? "later" : "done";
+      if (bk.classList.contains("turn")) snap.turns[bk.dataset.id] = why;
+      else if (state.erasedIds.has(bk.dataset.id)) snap.blocks[bk.dataset.id] = why;
+    });
+    try { localStorage.setItem(RKEY, JSON.stringify(snap)); } catch (_) {}
+  }
+  // Draw a saved highlight back onto its paragraph or answer. The quote may run across bold, code, links or line
+  // breaks, so the text is matched ignoring whitespace and element boundaries, and drawn as one mark per stretch.
+  function rewrap(id, quote, key) {
+    const host = key ? threadEl(key) : blockEl(id); if (!host) return false;
+    const scope = key ? host.querySelector(":scope > .ta") : host.querySelector(".body"); if (!scope) return false;
+    const nodes = []; const w = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) if (!n.parentElement.closest("mark.hl")) nodes.push(n);
+    let text = ""; const map = [];
+    nodes.forEach(t => { for (let i = 0; i < t.data.length; i++) if (!/\s/.test(t.data[i])) { text += t.data[i]; map.push([t, i]); } });
+    const q = String(quote || "").replace(/\s+/g, ""); if (!q) return false;
+    const pos = text.indexOf(q); if (pos < 0) return false;
+    const segs = []; let cur = null;
+    for (let k = pos; k < pos + q.length; k++) { const [node, off] = map[k]; if (cur && cur.node === node) cur.end = off + 1; else segs.push(cur = { node, start: off, end: off + 1 }); }
+    segs.forEach(g => { const r = document.createRange(); r.setStart(g.node, g.start); r.setEnd(g.node, g.end); const m = document.createElement("mark"); m.className = "hl"; m.dataset.q = quote; try { r.surroundContents(m); } catch (_) {} });
+    return true;
+  }
+  function hydrate() {
+    if (!READER) return;
+    let snap = {}; try { snap = JSON.parse(localStorage.getItem(RKEY) || "{}"); } catch (_) {}
+    state.hl = snap.hl || []; state.asks = snap.asks || []; state.suggest = snap.suggest || []; renderSuggest();
+    state.asks.forEach(a => {                       // answers given on the page, back in their places (asks that were only copied have none)
+      if (!a.answer) return;
+      if (a.id) { if (!blockEl(a.id)) return; const t = threadShell(a.id, a.question, a.quote, false, a.t, a.parent); t.querySelector(".ta").innerHTML = renderMd(a.answer); finishThread(t, a); if (a.done) t.classList.add("erased"); }
+      else liveBlocks(a, false);
+    });
+    Object.entries(snap.blocks || {}).forEach(([id, why]) => erase(id, { silent: true, why }));
+    Object.entries(snap.turns || {}).forEach(([id, why]) => { if (blockEl(id)) eraseTurn(id, why, { silent: true }); });
+    state.hl.forEach(h => rewrap(h.id, h.quote, h.key));
+  }
+
+  function stream(target, text) {
+    const words = text.split(" "); let i = 0; target.textContent = "";
+    const caret = document.createElement("span"); caret.className = "caret"; target.appendChild(caret);
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) { target.textContent = text; return; }
+    const tick = () => {
+      if (i >= words.length) { caret.remove(); return; }
+      caret.before(document.createTextNode((i ? " " : "") + words[i++]));
+      setTimeout(tick, 22 + Math.random() * 40);
+    };
+    tick();
+  }
+
+  // ---------- selection toolbar (the highlighter) ----------
+  const seltool = $("#seltool");
+  let pending = null;
+  document.addEventListener("mouseup", () => setTimeout(checkSelection, 0));
+  document.addEventListener("keyup", e => { if (e.shiftKey) checkSelection(); });
+  document.addEventListener("mousedown", e => { if (!seltool.contains(e.target)) seltool.hidden = true; });
+  function checkSelection() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) { seltool.hidden = true; return; }
+    const range = sel.getRangeAt(0);
+    const node = range.commonAncestorContainer;
+    const body = (node.nodeType === 1 ? node : node.parentElement).closest(".blk > .body, .thread > .ta");
+    const text = sel.toString().trim();
+    const limit = body.querySelector("pre") ? 2500 : 300;        // a stretch of a script or a diagram can be long; prose quotes stay short
+    if (!body || text.length < 2 || text.length > limit) { seltool.hidden = true; return; }
+    const th = body.classList.contains("ta") ? body.parentElement : null;        // a phrase inside an answer given here
+    if (th && (!th.dataset.key || th.classList.contains("live"))) { seltool.hidden = true; return; }
+    const rect = range.getBoundingClientRect();
+    pending = { id: body.closest(".blk").dataset.id, range: range.cloneRange(), text, parent: th ? th.dataset.key : undefined };
+    seltool.hidden = false;
+    seltool.style.left = (rect.left + rect.width / 2 + window.scrollX) + "px";
+    seltool.style.top = (rect.top + window.scrollY) + "px";
+  }
+  seltool.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => {
+    if (!pending) return;
+    const { id, text, parent } = pending;
+    window.getSelection().removeAllRanges(); seltool.hidden = true;
+    rewrap(id, text, parent);
+    const act = btn.dataset.act;
+    if (!state.hl.some(h => h.id === id && h.quote === text && (h.key || "") === (parent || ""))) state.hl.push(parent ? { id, quote: text, key: parent } : { id, quote: text });
+    persist();
+    if (act === "mark") { log("ask", `highlighted “${text.slice(0, 80)}”`); pending = null; return; }
+    if (act === "ask") openAsk(id, text, parent);
+    else ask(id, act === "simpler" ? `Explain “${text}” more simply` : `Give an example of “${text}”`, act, text, parent);
+    pending = null;
+  }));
+
+  root.addEventListener("click", e => {
+    const m = e.target.closest("mark.hl"); if (!m || !window.getSelection().isCollapsed) return;
+    const id = m.closest(".blk").dataset.id, quote = m.dataset.q || m.textContent, th = m.closest(".thread"), key = th ? th.dataset.key : "";
+    const scope = th ? th.querySelector(":scope > .ta") : m.closest(".blk").querySelector(".body");
+    scope.querySelectorAll("mark.hl").forEach(x => { if ((x.dataset.q || x.textContent) === quote) x.replaceWith(...x.childNodes); });
+    state.hl = state.hl.filter(h => !(h.id === id && h.quote === quote && (h.key || "") === (key || ""))); persist(); toast("Highlight removed");
+  });
+
+  // ---------- new top-level question: appended as a section, not a bubble ----------
+  const composer = $("#composer");
+  function sendNew() {
+    const q = composer.value.trim(); if (!q) return;
+    composer.value = "";
+    if (READER) { if (LIVE) askLive(null, q, "answer", ""); else { copyText(q, "Copied. Paste it into Claude Code."); log("new", q); } return; }
+    const n = ++state.newSeq;
+    const h = { id: `nh${n}`, type: "h2", html: escapeHtml(q) };
+    const p = { id: `np${n}`, type: "p", html: "", simpler: "A shorter version of the section above, in plain words.", example: "A worked example for the section above.", answer: "More detail on the section above." };
+    const hEl = renderBlock(h), pEl = renderBlock(p);
+    root.appendChild(hEl); root.appendChild(pEl);
+    const para = pEl.querySelector("p");
+    stream(para, "In the real app this section streams from the model, with the whole page above (minus what you have erased) as context. It behaves like any other paragraph: erase it when it is understood, or select a phrase to ask further.");
+    p.html = "The model's answer to the new question.";
+    log("new", q);
+    updateProgress();
+    hEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  composer.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === "Return")) sendNew(); });
+  $("#sendBtn").addEventListener("click", sendNew);
+
+  // ---------- keyboard ----------
+  document.addEventListener("keydown", e => {
+    const inField = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !inField) { e.preventDefault(); undo(); return; }
+    if (inField) return;
+    const focused = document.activeElement.closest && document.activeElement.closest(".blk");
+    if (e.key === "j" || e.key === "k") {
+      e.preventDefault();
+      const all = [...root.querySelectorAll(".blk")];
+      let i = focused ? all.indexOf(focused) : -1;
+      i = e.key === "j" ? Math.min(all.length - 1, i + 1) : Math.max(0, i - 1);
+      all[i].focus(); all[i].scrollIntoView({ block: "nearest" });
+    }
+    if (!focused) return;
+    const act = why => focused.dataset.type === "h2" ? eraseSection(focused.dataset.id, why) : focused.dataset.type === "ask" ? eraseTurn(focused.dataset.id, why) : erase(focused.dataset.id, { why });
+    if (e.key === "e") { e.preventDefault(); focused.classList.contains("erased") ? (focused.classList.contains("turn") ? restoreTurn(focused.dataset.id) : restore(focused.dataset.id)) : act("done"); }
+    if (e.key === "l" && !focused.classList.contains("erased")) { e.preventDefault(); act("later"); }
+    if (e.key === "a" && focused.dataset.type !== "h2") { e.preventDefault(); openAsk(focused.dataset.id); }
+    if (e.key === "s" && BRIDGE.id && !focused.classList.contains("erased")) { e.preventDefault(); saveToExtension(focused.dataset.id); }
+    if (e.key === "Escape") closeAsk();
+  });
+
+  // ---------- history, progress, toast ----------
+  function log(kind, text) {
+    state.history.unshift({ kind, text, t: new Date() });
+    renderHistory();
+  }
+  function renderHistory() {
+    const list = $("#histList"); const n = state.history.length;
+    $("#histCount").textContent = n;
+    $("#histSub").textContent = n ? `${n} event${n > 1 ? "s" : ""}` : "nothing yet";
+    if (!n) return;
+    const labels = { erase: "Understood", later: "Later", ask: "Asked", restore: "Restored", new: "New section" };
+    list.innerHTML = state.history.map(h => `<div class="hitem" data-kind="${h.kind}"><span class="t">${fmt(h.t)}</span><span><span class="k">${labels[h.kind]}</span><span class="x">${escapeHtml(h.text)}</span></span></div>`).join("");
+  }
+  function fmt(d) { return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
+  function updateProgress() {
+    const all = [...root.querySelectorAll('.blk')].filter(b => !/^(h2|ask)$/.test(b.dataset.type));
+    const open = all.filter(b => !b.classList.contains("erased")).length;
+    const done = all.length - open;
+    const threadsOpen = document.querySelectorAll(".thread:not(.erased)").length;
+    persist();
+    if (READER) { $("#ctxbox").innerHTML = "<b>This page changes what you see, not what Claude Code remembers.</b><br>Your marks are saved for this session and survive a refresh. To make Claude Code itself forget something, use /compact with instructions."; return; }
+    $("#ctxbox").innerHTML = `<b>What the model would receive next</b><br>${open} open paragraph${open === 1 ? "" : "s"} in full, ${threadsOpen} open follow-up${threadsOpen === 1 ? "" : "s"}, and a note that ${done} paragraph${done === 1 ? " is" : "s are"} already understood, so it will not re-explain ${done === 1 ? "it" : "them"}.`;
+  }
+  let toastTimer;
+  function toast(text, onUndo) {
+    const t = $("#toast"); $("#toastText").textContent = text; t.hidden = false;
+    $("#toastUndo").onclick = onUndo || null; $("#toastUndo").hidden = !onUndo;
+    clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 4000);
+  }
+  function hideToast() { $("#toast").hidden = true; }
+
+  $("#histBtn").addEventListener("click", () => {
+    const d = $("#drawer"); d.hidden = !d.hidden;
+    $("#histBtn").setAttribute("aria-pressed", String(!d.hidden));
+  });
+
+  // copying a selection that runs across paragraphs never picks up the buttons and stubs around the text
+  const CHROME_SEL = ".gutter, .turnbtns, .ghost, .title-ghost, .tactions, .tmeta, .askbox, .seltool, .composer, .hint, .thinking, .caret";
+  document.addEventListener("copy", e => {
+    const sel = window.getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount || !e.clipboardData) return;
+    if (document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+    const box = document.createElement("div");
+    for (let i = 0; i < sel.rangeCount; i++) box.appendChild(sel.getRangeAt(i).cloneContents());
+    if (!box.querySelector(CHROME_SEL)) return;                                     // nothing to strip: the browser's own copy is fine
+    box.querySelectorAll(CHROME_SEL).forEach(n => n.remove());
+    box.style.cssText = "position:fixed;left:-9999px;top:0;width:600px"; document.body.appendChild(box);
+    const text = box.innerText.replace(/\n{3,}/g, "\n\n").trim(); const html = box.innerHTML; box.remove();
+    e.clipboardData.setData("text/plain", text); e.clipboardData.setData("text/html", html); e.preventDefault();
+  });
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  function renderHint() {
+  document.querySelector(".hint").innerHTML = '<span>Hover a paragraph or a question: <b>✓</b> understood, <b>later</b> to revisit' + (BRIDGE.id ? ', <b>save</b> to keep it in Clean Chat' : '') + (READER.notesEndpoint ? ', <b>notes</b> to send it to your doc' : '') + '. Every mark can be undone with <kbd>⌘Z</kbd> or by clicking its stub.</span><span>Select a phrase to <b>highlight</b> it or to ask about it; ' + (LIVE ? 'the answer appears right here and Claude Code itself is left as it was. Select a phrase in that answer to go further.' : 'asking copies a ready prompt for Claude Code.') + ' Click a highlight to remove it.</span><span><kbd>e</kbd> understood · <kbd>l</kbd> later · <kbd>a</kbd> ask · <kbd>j</kbd>/<kbd>k</kbd> move</span>';
+  }
+  if (READER) {
+    document.querySelector(".brand .sub").textContent = "Claude Code reader";
+    document.querySelector("#titleRow .turnbtns").hidden = true;
+    renderHint();
+    document.querySelector(".composer .label").textContent = LIVE ? "Ask here" : "To Claude Code";
+    composer.placeholder = LIVE ? "A new question… Enter asks it here, with your highlights and follow-ups on this page as context" : "Type a new question… Enter copies it, ready to paste into Claude Code";
+    $("#sendBtn").textContent = LIVE ? "Ask" : "Copy";
+    if (LIVE) { const cb = document.createElement("button"); cb.id = "copyBtn"; cb.className = $("#sendBtn").className; cb.textContent = "Copy for Claude Code"; cb.title = "Copy the question to paste into Claude Code, so the session itself gets it"; cb.addEventListener("click", () => { const q = composer.value.trim(); if (q) copyText(q, "Copied. Paste it into Claude Code."); }); $("#sendBtn").after(cb); const sc = document.createElement("span"); sc.innerHTML = scopeToggle(); cb.after(sc); wireScope(sc);
+      const tools = $("#tools"); tools.hidden = false;
+      tools.innerHTML = '<button type="button" id="suggestBtn" title="Five questions worth asking next, from what you highlighted, asked and parked on this page">Suggest questions</button><button type="button" id="gapsBtn" title="A big-picture introduction to the context behind your questions on this page">Where are my gaps?</button><button type="button" id="mapBtn" title="A tree of the concepts behind your questions: the trunk, the branches, and where each question sits">Concept map</button><span id="suggest"></span>';
+      $("#suggestBtn").addEventListener("click", suggest); $("#gapsBtn").addEventListener("click", () => askLive(null, "", "gaps", "")); $("#mapBtn").addEventListener("click", () => askLive(null, "", "map", "")); }
+    hydrate(); hello();
+    const y = sessionStorage.getItem("cc:scroll"); if (y) { sessionStorage.removeItem("cc:scroll"); scrollTo(0, +y); }
+    if (location.protocol.startsWith("http")) {
+      let stamp = null;
+      setInterval(async () => {
+        if (document.querySelector(".askbox") || state.inflight || !window.getSelection().isCollapsed) return;   // never reload under your hands, or under an answer
+        try { const r = await fetch(location.href, { method: "HEAD", cache: "no-store" }); const lm = r.headers.get("last-modified");
+          if (stamp && lm && lm !== stamp) { sessionStorage.setItem("cc:scroll", String(scrollY)); location.reload(); } stamp = lm || stamp; } catch (_) {}
+      }, 3000);
+    }
+  }
+  updateProgress();
+})();
+</script>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html data-cc-site="chat.deepseek.com">
+<meta charset="utf-8">
+<title>Clean Chat extension — DeepSeek-shaped test fixture</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #1e2229; }
+  .list { display: flex; flex-direction: column; }
+  .ds-collapsible-text { align-self: flex-end; background: #eff6ff; border-radius: 14px; padding: 10px 16px; margin: 20px 0 10px; max-width: 80%; }
+  .ds-message { line-height: 1.6; }
+  .ds-think-content { color: #6b7280; border-left: 3px solid #d1d5db; padding-left: 10px; margin-bottom: 10px; font-size: 14px; }
+  .ds-markdown pre { background: #f3f4f6; padding: 10px; border-radius: 8px; }
+  #chat-input { width: 100%; box-sizing: border-box; border: 1px solid #c8ccd2; border-radius: 12px; min-height: 56px; padding: 14px; margin-top: 32px; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<p class="note">Imitates chat.deepseek.com's markup as open-source exporters describe it (ds-collapsible-text questions, ds-message replies with a ds-think-content block, textarea#chat-input). The html tag carries data-cc-site so the DeepSeek profile is used on localhost.</p>
+<main><div class="list">
+  <div data-virtual-list-item-key="1"><div class="ds-collapsible-text">Why does a static site need PKCE if there is no client secret to steal?</div></div>
+  <div data-virtual-list-item-key="2"><div class="ds-message">
+    <div class="ds-think-content"><div class="ds-collapsible-text">The user is asking about OAuth. I should explain the authorization code interception attack.</div></div>
+    <div class="ds-markdown ds-markdown--block">
+      <h2>What PKCE protects</h2>
+      <p>PKCE binds the authorization code to the app instance that started the login. The app proves it with a one-time verifier it generated itself.</p>
+      <ul>
+        <li>Generate a random verifier and send its SHA-256 hash with the authorize request.</li>
+        <li>Keep the verifier in the browser.</li>
+        <li>Trade the returned code plus the verifier for tokens.</li>
+      </ul>
+      <p>An attacker who intercepts the code cannot redeem it without the verifier.</p>
+    </div>
+  </div></div>
+  <div data-virtual-list-item-key="3"><div class="ds-collapsible-text">What happens when the access token expires?</div></div>
+  <div data-virtual-list-item-key="4"><div class="ds-message">
+    <div class="ds-markdown ds-markdown--block">
+      <p>Access tokens last about an hour. Use the refresh token to get a new one without another login, and store the newest refresh token each time.</p>
+      <pre><code>POST /api/token
+grant_type=refresh_token&amp;refresh_token=…</code></pre>
+    </div>
+  </div></div>
+</div>
+<textarea id="chat-input" placeholder="Message DeepSeek (fake composer)"></textarea>
+</main>
+<script src="content.js"></script>

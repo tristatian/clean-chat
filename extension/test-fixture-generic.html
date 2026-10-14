@@ -1,0 +1,39 @@
+<!doctype html>
+<html data-cc-site="chat.unknown-llm.example">
+<meta charset="utf-8">
+<title>How refresh tokens work — Unknown LLM</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #1e2229; }
+  .thread { display: flex; flex-direction: column; }
+  .row { display: flex; margin: 14px 0; }
+  .row.me { justify-content: flex-end; }
+  .bubble { background: #eef1f5; border-radius: 14px; padding: 10px 16px; max-width: 80%; }
+  .answer { line-height: 1.6; }
+  .answer pre { background: #f3f4f6; padding: 10px; border-radius: 8px; }
+  .box { border: 1px solid #c8ccd2; border-radius: 12px; min-height: 56px; padding: 14px; margin-top: 32px; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<p class="note">A chat site Clean Chat has never seen: no role attributes, no markdown class names, a made-up host. Replies must be found structurally and questions inferred as the rows that hold no reply.</p>
+<main><div class="thread">
+  <div class="row me"><div class="bubble">Why does a static site need PKCE if there is no client secret to steal?</div></div>
+  <div class="row"><div class="answer">
+    <h2>What PKCE protects</h2>
+    <p>PKCE binds the authorization code to the app instance that started the login. The app proves it with a one-time verifier it generated itself.</p>
+    <ul>
+      <li>Generate a random verifier and send its SHA-256 hash with the authorize request.</li>
+      <li>Keep the verifier in the browser.</li>
+      <li>Trade the returned code plus the verifier for tokens.</li>
+    </ul>
+    <p>An attacker who intercepts the code cannot redeem it without the verifier.</p>
+  </div></div>
+  <div class="row me"><div class="bubble">What happens when the access token expires?</div></div>
+  <div class="row"><div class="answer">
+    <p>Access tokens last about an hour. Use the refresh token to get a new one without another login, and store the newest refresh token each time.</p>
+    <pre><code>POST /api/token
+grant_type=refresh_token&amp;refresh_token=…</code></pre>
+  </div></div>
+</div>
+<div class="box" contenteditable="true" role="textbox" aria-label="Message (fake composer)"></div>
+</main>
+<script src="content.js"></script>

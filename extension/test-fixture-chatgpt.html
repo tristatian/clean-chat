@@ -1,0 +1,35 @@
+<!doctype html>
+<html data-cc-site="chatgpt.com" class="light">
+<meta charset="utf-8">
+<title>Clean Chat extension — ChatGPT-shaped test fixture</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #0d0d0d; }
+  article { margin: 18px 0; }
+  [data-message-author-role="user"] { background: #f4f4f4; border-radius: 18px; padding: 10px 16px; width: fit-content; margin-left: auto; }
+  .markdown { line-height: 1.6; } .markdown pre { background: #f4f4f4; padding: 10px; border-radius: 8px; }
+  .turn-actions { font-size: 12px; color: #8a8a8a; margin-top: 6px; }
+  #prompt-textarea { border: 1px solid #d0d0d0; border-radius: 24px; min-height: 52px; padding: 14px 18px; margin-top: 28px; white-space: pre-wrap; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<p class="note">Imitates chatgpt.com's markup: article turns, data-message-author-role, .markdown, #prompt-textarea.</p>
+<main>
+  <article data-testid="conversation-turn-1" data-turn="user"><div><div data-message-author-role="user"><div class="whitespace-pre-wrap">What is PKCE and why does a static site need it?</div></div></div></article>
+  <article data-testid="conversation-turn-2" data-turn="assistant"><div data-message-author-role="assistant"><div class="markdown prose">
+    <h2>What PKCE does</h2>
+    <p>PKCE lets an app that cannot keep a secret run the OAuth authorization-code flow safely. The app proves it started the login with a one-time secret it generated itself.</p>
+    <ul><li>Generate a random verifier and hash it.</li><li>Send the hash; keep the verifier.</li><li>Trade the code plus verifier for tokens.</li></ul>
+  </div></div><div class="turn-actions"><button>Copy</button> <button>Good response</button></div></article>
+  <article data-testid="conversation-turn-3" data-turn="user"><div>
+    <div class="attachments" style="display:flex;justify-content:flex-end;margin-bottom:6px"><img alt="flow.png" width="110" height="70" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='70'><rect width='110' height='70' fill='%23d9e2ec'/></svg>"></div>
+    <div data-message-author-role="user"><div class="whitespace-pre-wrap">What happens when the access token expires?</div></div>
+  </div></article>
+  <article data-testid="conversation-turn-4" data-turn="assistant"><div data-message-author-role="assistant"><div class="markdown prose">
+    <p>Access tokens last about an hour. Use the refresh token to get a new one without another login, and store the newest refresh token each time.</p>
+    <pre><code>POST /api/token
+grant_type=refresh_token</code></pre>
+  </div></div><div class="turn-actions"><button>Copy</button></div></article>
+  <div id="prompt-textarea" class="ProseMirror" contenteditable="true" aria-label="Message (fake composer)"></div>
+</main>
+<script src="content.js"></script>
+</html>

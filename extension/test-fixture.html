@@ -1,0 +1,55 @@
+<!doctype html>
+<html data-cc-site="claude.ai">
+<meta charset="utf-8">
+<title>Clean Chat extension — local test fixture</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #1e2229; }
+  [data-testid="user-message"] { background: #eef1f5; border-radius: 10px; padding: 10px 14px; margin: 24px 0 12px; }
+  [data-is-streaming] { padding: 0 4px; line-height: 1.6; }
+  pre { background: #f4f4f4; padding: 10px; border-radius: 6px; }
+  .ProseMirror { border: 1px solid #c8ccd2; border-radius: 10px; min-height: 64px; padding: 10px 12px; margin-top: 32px; white-space: pre-wrap; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<p class="note">This page imitates claude.ai's markup so the extension's content script can be tried without the real site. Open the console for <code>[Clean Chat]</code> logs.</p>
+<main>
+  <div data-testid="user-message"><p>How does Spotify's PKCE login work?</p></div>
+  <div data-is-streaming="false">
+    <h2>What PKCE is for</h2>
+    <p>PKCE lets an app that cannot keep a secret, such as a static web page, run the OAuth authorization-code flow safely. Instead of a client secret, the app proves it started the login by presenting a one-time secret it generated itself.</p>
+    <h2>The four steps</h2>
+    <ol>
+      <li>Generate a random <code>code_verifier</code>, hash it with SHA-256, base64url-encode the digest. That is the <code>code_challenge</code>.</li>
+      <li>Send the user to the authorize endpoint with the challenge. Keep the verifier in <code>sessionStorage</code>.</li>
+      <li>The user approves and is redirected back with a short-lived code.</li>
+      <li>POST the code plus the original verifier to the token endpoint. Spotify hashes the verifier and compares.</li>
+    </ol>
+    <pre><code>POST /api/token
+grant_type=authorization_code&amp;code=…&amp;code_verifier=…</code></pre>
+    <h2>Why it is safe</h2>
+    <p>An attacker who intercepts the code cannot redeem it, because they never saw the verifier. SHA-256 cannot be reversed to recover it from the challenge.</p>
+  </div>
+  <div class="msg-row">
+    <div class="attachments" style="display:flex;gap:8px;margin:24px 0 -12px">
+      <img alt="token-timeline.png" width="120" height="80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='80'><rect width='120' height='80' fill='%23cfd8e3'/><text x='12' y='45' font-size='12' fill='%23334'>timeline.png</text></svg>">
+      <div data-testid="file-thumbnail" style="border:1px solid #c8ccd2;border-radius:8px;padding:10px 14px;font-size:13px">spotify-auth-notes.pdf</div>
+    </div>
+    <div data-testid="user-message"><p>What happens after the token expires?</p></div>
+    <div class="msg-actions" style="font-size:12px;color:#7a8188;margin-top:-6px"><button>Edit</button> <button>Copy</button></div>
+  </div>
+  <div data-is-streaming="false">
+    <p>Access tokens expire after one hour. Use the refresh token to get a new one without sending the user through login again. For PKCE clients Spotify returns a new refresh token with each refresh, so always store the newest one.</p>
+    <svg width="320" height="160" role="img" aria-label="Token lifetime over one hour" style="display:block;margin:12px 0;background:#f4f6f8"><polyline points="10,140 110,90 210,50 310,20" fill="none" stroke="#2b5c8a" stroke-width="3"/></svg>
+    <p><strong>5. ASR vs. transfer ASR</strong><br>ASR means attack success rate. The two charts have different denominators.</p>
+    <ul><li><strong>Graph 1, live ASR:</strong> breaks divided by every attempt.</li><li><strong>Graph 2, transfer ASR:</strong> attacks that already worked, replayed.</li></ul>
+    <p>Analogy: graph 1 is a random lockpicking attempt.</p>
+    <p><strong>6. What to take from it</strong><br>Compare like with like.</p>
+    <p>Two things to check:</p>
+    <ul><li>Which denominator a chart uses.</li><li>Whether attacks were filtered first.</li></ul>
+    <iframe title="visualize: Refresh flow" width="320" height="120" srcdoc="<p id='w'>WorldSim (an LLM) fakes tool results</p>"></iframe>
+    <p>If the token request returns <code>400 invalid_grant</code>, the verifier did not match or the code expired. Regenerate the verifier and start over.</p>
+  </div>
+  <div contenteditable="true" class="ProseMirror" aria-label="Message box (fake composer)"></div>
+</main>
+<script src="content.js"></script>
+</html>

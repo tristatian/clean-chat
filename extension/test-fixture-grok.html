@@ -1,0 +1,31 @@
+<!doctype html>
+<html data-cc-site="grok.com" class="light">
+<meta charset="utf-8">
+<title>Clean Chat extension — Grok-shaped test fixture</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #111; }
+  .flex { display: flex; } .flex-col { flex-direction: column; } .items-end { align-items: flex-end; } .items-start { align-items: flex-start; }
+  [id^="response-"] { margin: 16px 0; }
+  .items-end .message-bubble { background: #f0f0f0; border-radius: 20px; padding: 10px 16px; }
+  .response-content-markdown { line-height: 1.6; }
+  .action-buttons { font-size: 12px; color: #8a8a8a; margin-top: 4px; }
+  textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; border-radius: 20px; padding: 14px 18px; margin-top: 28px; font: inherit; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<p class="note">Imitates grok.com's markup: response- rows with items-end / items-start, .message-bubble, .response-content-markdown, a textarea message box.</p>
+<main><div class="conversation">
+  <div id="response-u1" class="relative group flex flex-col items-end"><div class="message-bubble"><span class="whitespace-pre-wrap">What is PKCE and why does a static site need it?</span></div></div>
+  <div id="response-a1" class="relative group flex flex-col items-start"><div class="message-bubble"><div class="response-content-markdown markdown">
+    <h2>What PKCE does</h2>
+    <p>PKCE lets an app that cannot keep a secret run the OAuth authorization-code flow safely. The app proves it started the login with a one-time secret it generated itself.</p>
+    <ul><li>Generate a random verifier and hash it.</li><li>Send the hash; keep the verifier.</li></ul>
+  </div></div><div class="action-buttons"><button>Copy</button></div></div>
+  <div id="response-u2" class="relative group flex flex-col items-end"><div class="message-bubble"><span class="whitespace-pre-wrap">What happens when the access token expires?</span></div></div>
+  <div id="response-a2" class="relative group flex flex-col items-start"><div class="message-bubble"><div class="response-content-markdown markdown">
+    <p>Access tokens last about an hour. Use the refresh token to get a new one without another login.</p>
+  </div></div><div class="action-buttons"><button>Copy</button></div></div>
+</div>
+<textarea aria-label="Ask Grok anything"></textarea></main>
+<script src="content.js"></script>
+</html>

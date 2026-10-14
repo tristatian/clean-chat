@@ -1,0 +1,124 @@
+{
+  "manifest_version": 3,
+  "name": "Clean Chat",
+  "version": "0.7.3",
+  "description": "Erase what you understand, park what can wait, save what matters. A reading mode for Claude, Gemini, ChatGPT, Grok, DeepSeek, Doubao, Kimi, Qwen, Z.ai, Yuanbao, Copilot, Perplexity and more.",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://grok.com/*",
+        "https://chat.deepseek.com/*",
+        "https://*.doubao.com/*",
+        "https://*.kimi.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://chat.qwen.ai/*",
+        "https://chat.qwenlm.ai/*",
+        "https://*.tongyi.com/*",
+        "https://yuanbao.tencent.com/*",
+        "https://chat.z.ai/*",
+        "https://*.chatglm.cn/*",
+        "https://yiyan.baidu.com/*",
+        "https://chat.minimaxi.com/*",
+        "https://chat.minimax.io/*",
+        "https://*.perplexity.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://*.copilot.com/*",
+        "https://chat.mistral.ai/*",
+        "https://*.meta.ai/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://grok.com/*",
+        "https://chat.deepseek.com/*",
+        "https://*.doubao.com/*",
+        "https://*.kimi.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://chat.qwen.ai/*",
+        "https://chat.qwenlm.ai/*",
+        "https://*.tongyi.com/*",
+        "https://yuanbao.tencent.com/*",
+        "https://chat.z.ai/*",
+        "https://*.chatglm.cn/*",
+        "https://yiyan.baidu.com/*",
+        "https://chat.minimaxi.com/*",
+        "https://chat.minimax.io/*",
+        "https://*.perplexity.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://*.copilot.com/*",
+        "https://chat.mistral.ai/*",
+        "https://*.meta.ai/*",
+        "https://*.claudeusercontent.com/*",
+        "https://*.claudemcpcontent.com/*"
+      ],
+      "js": [
+        "frame.js"
+      ],
+      "all_frames": true,
+      "match_origin_as_fallback": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://127.0.0.1:8379/*",
+        "http://localhost:8379/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://grok.com/*",
+    "https://chat.deepseek.com/*",
+    "https://*.doubao.com/*",
+    "https://*.kimi.com/*",
+    "https://kimi.moonshot.cn/*",
+    "https://chat.qwen.ai/*",
+    "https://chat.qwenlm.ai/*",
+    "https://*.tongyi.com/*",
+    "https://yuanbao.tencent.com/*",
+    "https://chat.z.ai/*",
+    "https://*.chatglm.cn/*",
+    "https://yiyan.baidu.com/*",
+    "https://chat.minimaxi.com/*",
+    "https://chat.minimax.io/*",
+    "https://*.perplexity.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://*.copilot.com/*",
+    "https://chat.mistral.ai/*",
+    "https://*.meta.ai/*",
+    "https://*.claudeusercontent.com/*",
+    "https://*.claudemcpcontent.com/*",
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ]
+}

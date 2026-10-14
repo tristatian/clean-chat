@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saved · Clean Chat</title>
+<style>
+  :root {
+    --paper: #f5f6f2; --surface: #ffffff; --ink: #1e2229; --ink-2: #4a5058; --muted: #7a8188; --rule: #dcdfd8;
+    --accent: #2b5c8a; --accent-soft: #e3ecf4; --later: #d9480f; --later-soft: rgba(217,72,15,0.10); --hl: #ffe58a;
+    --serif: "Iowan Old Style", "Charter", "Literata", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #15181c; --surface: #1c2025; --ink: #e6e8e3; --ink-2: #b8bdb6; --muted: #858c93; --rule: #2c3138; --accent: #7fb2d9; --accent-soft: #22303c; --later: #ff8a50; --later-soft: rgba(255,138,80,0.16); --hl: rgba(255,229,138,0.28); }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible, [contenteditable]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  a { color: var(--accent); }
+
+  header.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 20px; background: var(--paper); border-bottom: 1px solid var(--rule); }
+  .brand { font-family: var(--serif); font-weight: 600; font-size: 16px; }
+  .tabs { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 2px; }
+  .tab { padding: 5px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+  .tab b { font-weight: 500; color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .tab[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); }
+  .usage { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .bar input[type="search"] { flex: 1; min-width: 150px; max-width: 360px; font: inherit; font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 7px 10px; }
+  .bar .actions { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+  .barbtn { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--rule); background: var(--surface); font-size: 12px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+  .barbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .barbtn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .barbtn.on { background: var(--later-soft); border-color: var(--later); color: var(--later); }
+  .barbtn.warn { border-color: var(--later); color: var(--later); }
+
+  .layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); min-height: calc(100vh - 52px); }
+  nav.list { border-right: 1px solid var(--rule); overflow: auto; max-height: calc(100vh - 52px); position: sticky; top: 52px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+  .chip { font-size: 11.5px; font-weight: 500; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 3px 10px; }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  .item { display: block; width: 100%; text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+  .item:hover { background: var(--surface); }
+  .item.active { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+  .item.pinned { box-shadow: inset 3px 0 0 var(--later); }
+  .item.pinned.active { box-shadow: inset 3px 0 0 var(--later); }
+  .item .q { font-family: var(--serif); font-size: 15px; line-height: 1.35; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .item .m { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .item .m .pin { color: var(--later); font-weight: 600; }
+  .item .t { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .item .t span { font-size: 10.5px; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 0 7px; }
+  .empty { padding: 28px 20px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+  main.detail { padding: 32px 24px 80px; }
+  .column { max-width: 720px; margin: 0 auto; }
+  .detail h1 { font-family: var(--serif); font-size: 26px; font-weight: 500; line-height: 1.25; margin: 0 0 8px; text-wrap: balance; border-radius: 4px; }
+  .detail h1[contenteditable="true"] { background: var(--surface); outline: 2px solid var(--accent); outline-offset: 4px; }
+  .meta { color: var(--muted); font-size: 12px; margin-bottom: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+  .meta .kind { font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+  .detail .acts { display: flex; gap: 6px; margin: 0 0 14px; flex-wrap: wrap; }
+  .tagrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 22px; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 4px 2px 10px; }
+  .tag button { font-size: 13px; line-height: 1; padding: 0 5px; border-radius: 999px; color: var(--accent); }
+  .tag button:hover { background: var(--accent); color: var(--surface); }
+  .tag-input { font: inherit; font-size: 12px; color: var(--ink); background: transparent; border: 1px dashed var(--rule); border-radius: 999px; padding: 2px 10px; width: 120px; }
+  .tag-input::placeholder { color: var(--muted); }
+  article { font-family: var(--serif); font-size: 17px; line-height: 1.62; }
+  article h2 { font-size: 20px; font-weight: 600; margin: 26px 0 8px; } article h3 { font-size: 17px; font-weight: 600; margin: 20px 0 6px; }
+  article p { margin: 0 0 14px; } article ul, article ol { margin: 0 0 14px; padding-left: 1.5em; } article li { margin: 4px 0; }
+  article pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 0 0 14px; }
+  article code { font-family: var(--mono); font-size: 0.86em; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 0 4px; } article pre code { border: 0; background: none; padding: 0; font-size: inherit; }
+  article blockquote { margin: 0 0 14px; padding-left: 14px; border-left: 3px solid var(--rule); color: var(--ink-2); font-style: italic; }
+  article table { border-collapse: collapse; font-size: 14px; margin: 0 0 14px; max-width: 100%; display: block; overflow-x: auto; } article th, article td { border: 1px solid var(--rule); padding: 6px 10px; text-align: left; } article th { background: var(--surface); }
+  mark.hl { background: var(--hl); color: inherit; padding: 0.05em 0; border-radius: 2px; cursor: pointer; }
+  mark.hl.noted { text-decoration: underline dotted var(--later); text-underline-offset: 3px; }
+  .notes { margin: 0 0 26px; }
+  .notes .label, .hl-edit .label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--later); margin-bottom: 6px; }
+  .notes textarea, .hl-edit textarea { width: 100%; min-height: 64px; font: inherit; font-family: var(--serif); font-size: 16px; line-height: 1.55; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--later); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+  .notes textarea::placeholder, .hl-edit textarea::placeholder, .entry::placeholder { color: var(--muted); font-style: italic; }
+  .hl-edit { font-family: var(--sans); font-size: 14px; margin: 10px 0 18px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+  .hl-edit .hl-q { font-family: var(--serif); font-style: italic; color: var(--ink-2); margin-bottom: 8px; }
+  .hl-edit textarea { min-height: 52px; font-size: 15px; }
+  .hl-edit .acts { margin: 8px 0 0; }
+  textarea.entry { display: block; width: 100%; min-height: 55vh; font: inherit; font-family: var(--serif); font-size: 18px; line-height: 1.65; color: var(--ink); background: transparent; border: 0; padding: 0; resize: none; outline: none; }
+  .seltool { position: absolute; z-index: 30; display: flex; gap: 2px; padding: 4px; background: var(--ink); color: var(--paper); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translate(-50%, calc(-100% - 10px)); white-space: nowrap; font-family: var(--sans); }
+  .seltool button { color: inherit; padding: 5px 9px; border-radius: 5px; font-size: 12.5px; font-weight: 500; }
+  .seltool button:hover { background: rgba(255,255,255,0.14); }
+  .seltool button.primary { background: var(--hl); color: #1e2229; }
+  .seltool::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; background: var(--ink); transform: translateX(-50%) rotate(45deg); }
+  .followups { margin: 28px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); font-family: var(--sans); }
+  .followups .label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .follow { margin: 0 0 14px; padding-left: 14px; border-left: 2px solid var(--accent); }
+  .follow .fq { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .follow .fq .who { font-weight: 600; color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .follow .fa { font-family: var(--serif); font-size: 16px; line-height: 1.58; }
+  .follow .fa p { margin: 0 0 8px; } .follow .fa ul, .follow .fa ol { margin: 0 0 8px; padding-left: 1.4em; }
+  .follow .fa pre { font-family: var(--mono); font-size: 13px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; overflow-x: auto; }
+  .follow .fa code { font-family: var(--mono); font-size: 0.86em; }
+  .follow .fa .muted, .follow .fa .thinking { color: var(--muted); font-family: var(--sans); font-size: 13px; }
+  .follow .fa .caret { display: inline-block; width: 2px; height: 1em; background: var(--accent); vertical-align: -0.15em; margin-left: 2px; }
+  .follow .fm { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+  .follow .fm button { font-size: 11.5px; color: var(--muted); padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; }
+  .follow .fm button:hover { border-color: var(--rule); color: var(--ink-2); }
+  .askrow { display: flex; gap: 6px; margin-top: 10px; }
+  .askrow input { flex: 1; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; }
+  .askhint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 14px; border-radius: 8px; font-size: 13px; }
+  .back { display: none; margin-bottom: 14px; }
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.list { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--rule); }
+    .layout.showing nav.list { display: none; }
+    .layout:not(.showing) main.detail { display: none; }
+    .back { display: inline-flex; }
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">Clean Chat</div>
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabSaved" role="tab" aria-selected="true">Saved<b id="nSaved">0</b></button>
+    <button class="tab" id="tabJournal" role="tab" aria-selected="false">Journal<b id="nJournal">0</b></button>
+  </div>
+  <input id="search" type="search" placeholder="Search" aria-label="Search">
+  <span class="usage" id="usage" title="Where this lives: Chrome's storage for this extension, on this computer only"></span>
+  <div class="actions">
+    <button class="barbtn primary" id="newEntry" hidden title="Start a journal entry (n)">New entry</button>
+    <button class="barbtn" id="exportMd" title="Everything in this tab, as markdown on your clipboard">copy all as markdown</button>
+    <button class="barbtn" id="download" title="One backup file with saved answers and the journal">download backup</button>
+  </div>
+</header>
+<div class="layout" id="layout">
+  <nav class="list" aria-label="Items"><div class="filters" id="filters"></div><div id="list"></div></nav>
+  <main class="detail" id="detail"></main>
+</div>
+<div class="seltool" id="seltool" hidden role="toolbar"><button class="primary" data-act="hl">Highlight</button><button data-act="note">Highlight and note</button><button class="primary" data-act="unhl" style="display:none">Remove highlight</button></div>
+<div class="toast" id="toast" hidden></div>
+<script src="saved.js"></script>
+</body>
+</html>
