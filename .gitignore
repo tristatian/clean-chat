@@ -11,3 +11,4 @@ docx_part*.py
 agents-eval-redteam.*
 sample-page.html
 backlog-sample.html
+/dist/
