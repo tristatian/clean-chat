@@ -18,4 +18,4 @@ Clean Chat runs entirely on your own computer: a Chrome extension that reads the
 
 ## Reporting a flaw
 
-Please email **tristatian@icloud.com** with the steps to reproduce, or use GitHub's private vulnerability report on this repository if it is enabled. Do not open a public issue for a security problem until it is fixed. I am one person; expect an answer within a week.
+Please email **tianziyao5@gmail.com** with the steps to reproduce, or use GitHub's private vulnerability report on this repository if it is enabled. Do not open a public issue for a security problem until it is fixed. I am one person; expect an answer within a week.
