@@ -229,7 +229,7 @@
   // selections made inside embedded frames arrive here, relayed by the background worker
   let frameSel = null; const frameSeen = {};
   if (globalThis.chrome?.runtime?.onMessage) chrome.runtime.onMessage.addListener(m => {
-    if (m && m.type === "cc:frameinput") { lastUserScrollInput = Date.now(); if (pin) releasePin(false); return; }   // wheel or touch inside a frame
+    if (m && m.type === "cc:frameinput") { lastUserScrollInput = Date.now(); if (pin) releasePin(false, "you scrolled inside a frame"); return; }   // wheel or touch inside a frame
     if (!m || (m.type !== "cc:framesel" && m.type !== "cc:framehello")) return;
     frameSeen[m.from || "unknown"] = true;
     if (m.type === "cc:framesel") frameSel = m.text ? { text: m.text, t: Date.now() } : null;
@@ -264,6 +264,9 @@
       }
       lines.push(`${i + 1}. <${el.tagName.toLowerCase()}> "${figRaw(el)}": ${what}`);
     });
+    const sc = scrollContainerOf(latestMessage());
+    lines.push(`scrolls in: ${isDocScroller(sc) ? "the page" : shape(sc)} · position ${Math.round(getTop(sc))} of ${Math.round(maxTop(sc))} · stay put: ${settings.stayPut === false ? "off" : "on"}`);
+    lines.push("stay-put log: " + (pinLog.join(" | ") || "nothing yet (no question sent on this page since it loaded)"));
     lines.push("frames reporting to Clean Chat: " + (Object.keys(frameSeen).join(", ") || "none"));
     const r = await frameSelections();
     lines.push("frames Clean Chat can read: " + (r.frames.filter(f => !f.top).map(f => `${f.site}${f.text ? " (has a selection)" : ""}`).join(", ") || "none") + (r.error ? ` [${r.error}]` : ""));
@@ -646,64 +649,91 @@
   // reading position is pinned: the site's own scrolls are undone until you scroll yourself, click "Go to answer",
   // or a few minutes pass. If you were already at the bottom, nothing changes.
   let pin = null, lastUserScrollInput = 0;
+  const pinLog = [];                                       // the last few stay-put events, shown by "copy page info"
+  const plog = t => { pinLog.push(new Date().toTimeString().slice(0, 8) + " " + t); if (pinLog.length > 12) pinLog.shift(); };
   const isDocScroller = c => c === document.scrollingElement || c === document.documentElement || c === document.body;
   const getTop = c => (isDocScroller(c) ? window.scrollY : c.scrollTop);
   const setTop = (c, y) => { if (isDocScroller(c)) window.scrollTo({ top: y, behavior: "auto" }); else c.scrollTop = y; };
   const maxTop = c => (isDocScroller(c) ? document.documentElement.scrollHeight - window.innerHeight : c.scrollHeight - c.clientHeight);
-  function scrollContainerOf(el) {
-    for (let n = el; n && n !== document.body; n = n.parentElement) {
-      const cs = getComputedStyle(n);
-      if (/(auto|scroll)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight + 4) return n;
+  const scrolls = n => n.nodeType === 1 && n.scrollHeight > n.clientHeight + 4 && /(auto|scroll|overlay)/.test(getComputedStyle(n).overflowY);
+  const name = c => (isDocScroller(c) ? "the page" : shape(c).split(" ")[0]);
+  // every box that can scroll between the conversation and the page, innermost first; the page itself last if it scrolls.
+  // When none is found by walking up (the conversation sits in a box the walk cannot see), the biggest scrollable box on the page.
+  function scrollContainersOf(el) {
+    const out = [];
+    for (let n = el; n && n !== document.body; n = n.parentElement) if (scrolls(n)) out.push(n);
+    const doc = document.scrollingElement || document.documentElement;
+    if (maxTop(doc) > 4) out.push(doc);
+    if (!out.length) {
+      let best = null;
+      for (const n of document.querySelectorAll("div, main, section")) if (!layer.contains(n) && scrolls(n) && (!best || n.scrollHeight > best.scrollHeight)) best = n;
+      out.push(best || doc);
     }
-    return document.scrollingElement || document.documentElement;
+    return out;
   }
+  function scrollContainerOf(el) { return scrollContainersOf(el)[0]; }
   function latestMessage() { const roots = assistantRoots(), users = userMessages(); return roots[roots.length - 1] || users[users.length - 1] || document.body; }
-  function pinReadingPosition() {
-    if (settings.stayPut === false || pin) return;
-    const c = scrollContainerOf(latestMessage());
+  function pinReadingPosition(how) {
+    if (settings.stayPut === false) { plog(`${how}: stay put is switched off`); return; }
+    if (pin) return;
+    const cs = scrollContainersOf(latestMessage()), c = cs[0];
     const top = getTop(c);
-    if (maxTop(c) - top < 240) return;                       // already at the bottom: let the site follow the answer
-    pin = { c, top, until: Date.now() + 180000 };
-    c.style.setProperty("scroll-behavior", "auto", "important");
+    if (maxTop(c) - top < 240) { plog(`${how}: already at the bottom of ${name(c)} (${Math.round(maxTop(c) - top)}px left), the site may follow the answer`); return; }
+    pin = { c, top, tops: new Map(cs.map(x => [x, getTop(x)])), until: Date.now() + 180000, holds: 0 };
+    plog(`${how}: holding ${name(c)} at ${Math.round(top)} of ${Math.round(maxTop(c))}${cs.length > 1 ? ` (+${cs.length - 1} outer)` : ""}`);
+    cs.forEach(x => x.style.setProperty("scroll-behavior", "auto", "important"));
     // scroll events can lag behind the site's own scrolling; a light poll keeps the position honest regardless
     pin.timer = setInterval(() => {
       if (!pin) return;
-      if (Date.now() > pin.until) { releasePin(false); return; }
-      if (Date.now() - lastUserScrollInput > 400 && Math.abs(getTop(pin.c) - pin.top) > 2) holdOrLetGo();
+      if (Date.now() > pin.until) { releasePin(false, "time is up"); return; }
+      if (!pin.c.isConnected) {                              // the site rebuilt its scroll box (Angular and React apps do): hold the new one at the same place
+        const c2 = scrollContainerOf(latestMessage()); plog(`${name(pin.c)} was replaced by ${name(c2)}; holding it`);
+        pin.tops.delete(pin.c); pin.c = c2; pin.tops.set(c2, pin.top); c2.style.setProperty("scroll-behavior", "auto", "important");
+      }
+      if (Date.now() - lastUserScrollInput > 400 && moved()) holdOrLetGo();
     }, 60);
     $(".cc-toast-text").textContent = "Staying where you were while the answer arrives";
-    $(".cc-undo").textContent = "Go to answer"; $(".cc-undo").hidden = false; $(".cc-undo").onclick = () => releasePin(true);
+    $(".cc-undo").textContent = "Go to answer"; $(".cc-undo").hidden = false; $(".cc-undo").onclick = () => releasePin(true, "go to answer");
     toastEl.hidden = false; clearTimeout(toastTimer);
   }
+  const moved = () => [...pin.tops].some(([x, t]) => x.isConnected && Math.abs(getTop(x) - t) > 2);
   // While the pointer is inside an embedded frame (a diagram), the page cannot hear the wheel, so the reader's own
   // scrolling looks like the site's. The site's follow-scroll goes to the bottom; anything else is the reader: let go.
   function holdOrLetGo() {
-    if (document.querySelector("iframe:hover") && maxTop(pin.c) - getTop(pin.c) > 400) releasePin(false);
-    else setTop(pin.c, pin.top);
+    if (document.querySelector("iframe:hover") && maxTop(pin.c) - getTop(pin.c) > 400) { releasePin(false, "scrolled inside a frame"); return; }
+    pin.holds++;
+    for (const [x, t] of pin.tops) if (x.isConnected && Math.abs(getTop(x) - t) > 2) setTop(x, t);
   }
-  function releasePin(goToAnswer) {
+  function releasePin(goToAnswer, why) {
     if (!pin) return;
-    const c = pin.c; clearInterval(pin.timer); pin = null; c.style.removeProperty("scroll-behavior");
+    const { c, tops, holds } = pin; clearInterval(pin.timer); pin = null;
+    tops.forEach((t, x) => x.style.removeProperty("scroll-behavior"));
+    plog(`let go (${why || "released"}) after holding ${holds} time${holds === 1 ? "" : "s"}`);
     $(".cc-undo").textContent = "Undo"; $(".cc-undo").onclick = undo; hideToast();
     if (goToAnswer) setTimeout(() => latestMessage().scrollIntoView({ block: "start", behavior: "auto" }), 0);   // instant: a smooth scroll can be dropped when the tab is not in front
+    void c;
   }
   document.addEventListener("scroll", e => {
     if (!pin) return;
-    if (Date.now() > pin.until || Date.now() - lastUserScrollInput < 400) { releasePin(false); return; }
+    if (Date.now() > pin.until || Date.now() - lastUserScrollInput < 400) { releasePin(false, Date.now() > pin.until ? "time is up" : "you scrolled"); return; }
     const c = e.target === document ? (document.scrollingElement || document.documentElement) : e.target;
-    if (c !== pin.c && !(isDocScroller(c) && isDocScroller(pin.c))) return;
-    if (Math.abs(getTop(pin.c) - pin.top) > 2) holdOrLetGo();
+    if (!pin.tops.has(c) && !(isDocScroller(c) && isDocScroller(pin.c))) {
+      // the site scrolled a box this pin did not know about; if it holds the conversation, it is the one to hold
+      if (c.nodeType === 1 && !layer.contains(c) && c.contains(latestMessage()) && scrolls(c)) { plog(`the site scrolled ${name(c)} instead; holding it`); pin.tops.set(c, Math.min(pin.top, maxTop(c))); c.style.setProperty("scroll-behavior", "auto", "important"); }
+      else return;
+    }
+    if (moved()) holdOrLetGo();
   }, true);
-  ["wheel", "touchmove"].forEach(ev => document.addEventListener(ev, () => { lastUserScrollInput = Date.now(); if (pin) releasePin(false); }, { passive: true, capture: true }));
+  ["wheel", "touchmove"].forEach(ev => document.addEventListener(ev, () => { lastUserScrollInput = Date.now(); if (pin) releasePin(false, "you scrolled"); }, { passive: true, capture: true }));
   document.addEventListener("mousedown", e => { if (pin && (e.target === pin.c || e.target === document.documentElement || e.target === document.body)) lastUserScrollInput = Date.now(); }, true);   // scrollbar drag
   document.addEventListener("keydown", e => {
     const inBox = e.target && (e.target.isContentEditable || /^(INPUT|TEXTAREA)$/.test(e.target.tagName));
-    if (pin && !inBox && /^(ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(e.key)) releasePin(false);
-    if (e.key === "Enter" && !e.shiftKey && !e.altKey && !e.isComposing) { const ed = composer(); if (ed && (e.target === ed || ed.contains(e.target))) pinReadingPosition(); }
+    if (pin && !inBox && /^(ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(e.key)) releasePin(false, "you pressed a scroll key");
+    if (e.key === "Enter" && !e.shiftKey && !e.altKey && !e.isComposing) { const ed = composer(); if (ed && (e.target === ed || ed.contains(e.target))) pinReadingPosition("Enter in the message box"); }
   }, true);
   document.addEventListener("click", e => {
     const b = e.target.closest && e.target.closest('button[aria-label*="send" i], button[data-testid*="send" i], button[type="submit"], button.send-button');
-    if (b && !layer.contains(b)) pinReadingPosition();
+    if (b && !layer.contains(b)) pinReadingPosition("send button");
   }, true);
 
   // ------------------------------------------------------------ composer (never auto-sends)
@@ -998,7 +1028,7 @@
     return out.join("\n") || "Nothing parked yet.";
   }
   async function copyText(text, msg) { try { await navigator.clipboard.writeText(text); toast(msg); } catch { toast("Couldn't reach the clipboard; the text is in the console."); log(text); } }
-  $(".cc-stay-put").addEventListener("change", e => { settings.stayPut = e.target.checked; saveSettings(); if (!settings.stayPut) releasePin(false); });
+  $(".cc-stay-put").addEventListener("change", e => { settings.stayPut = e.target.checked; saveSettings(); if (!settings.stayPut) releasePin(false, "setting switched off"); });
   $(".cc-show-stubs").addEventListener("change", e => { state.showStubs = e.target.checked; document.documentElement.classList.toggle("cc-hide-stubs", !state.showStubs); saveState(); });
   async function renderPanel() {
     if (panel.hidden) return;

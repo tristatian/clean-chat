@@ -1,0 +1,75 @@
+<!doctype html>
+<html data-cc-site="gemini.google.com">
+<meta charset="utf-8">
+<title>Clean Chat extension — Gemini-shaped fixture with an inner scroll box</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body { font-family: system-ui, sans-serif; color: #1e2229; display: flex; flex-direction: column; }
+  user-query, model-response, message-content, rich-textarea, user-query-content { display: block; }
+  #chat-history { flex: 1; overflow-y: auto; padding: 24px 16px; }
+  .inner { max-width: 720px; margin: 0 auto; }
+  .user-query-bubble { background: #e8f0fe; border-radius: 18px; padding: 10px 16px; width: fit-content; margin: 24px 0 12px auto; }
+  model-response { padding: 0 4px; line-height: 1.6; }
+  .composer { padding: 12px 16px; border-top: 1px solid #ddd; }
+  .ql-editor { border: 1px solid #c8ccd2; border-radius: 24px; min-height: 56px; padding: 14px 18px; white-space: pre-wrap; max-width: 720px; margin: 0 auto; }
+  .note { font-size: 12px; color: #7a8188; }
+</style>
+<div id="chat-history"><div class="inner">
+  <p class="note">Imitates Gemini with the conversation in its own scroll box (#chat-history). Press Enter in the box: the fake site appends a question and a streaming answer, scrolls to it, rebuilds the scroll box once mid-stream, and keeps following the answer, exactly the behaviour Clean Chat has to undo.</p>
+  <user-query><user-query-content><span class="query-text">What is PKCE and why does a static site need it?</span></user-query-content></user-query>
+  <model-response><message-content><div class="markdown markdown-main-panel">
+    <h2>What PKCE does</h2>
+    <p>PKCE lets an app that cannot keep a secret run the OAuth authorization-code flow safely. The app proves it started the login with a one-time secret it generated itself.</p>
+    <p>Filler paragraph 1: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 2: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 3: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 4: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 5: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 6: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 7: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 8: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 9: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 10: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 11: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 12: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 13: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 14: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 15: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 16: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 17: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 18: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 19: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 20: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 21: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 22: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 23: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+<p>Filler paragraph 24: the page needs enough text that the conversation box scrolls, so that a follow-scroll from the site has somewhere to go. This sentence is repeated to make the paragraph long enough to matter.</p>
+  </div></message-content></model-response>
+</div></div>
+<div class="composer"><div class="ql-editor" contenteditable="true" aria-label="Enter a prompt here"></div></div>
+<script src="content.js"></script>
+<script>
+  // the fake site: on Enter, add a question and a streaming answer, follow it, and rebuild the scroll box once
+  window.siteLog = [];
+  document.querySelector(".ql-editor").addEventListener("keydown", e => {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    e.preventDefault();
+    const text = e.target.textContent.trim() || "A follow-up question"; e.target.textContent = "";
+    let box = document.getElementById("chat-history"), inner = box.querySelector(".inner");
+    const q = document.createElement("user-query"); q.innerHTML = `<user-query-content><span class="query-text">${text}</span></user-query-content>`; inner.appendChild(q);
+    const r = document.createElement("model-response"); r.innerHTML = `<message-content><div class="markdown markdown-main-panel"><p></p></div></message-content>`; inner.appendChild(r);
+    q.scrollIntoView({ block: "start", behavior: "smooth" }); window.siteLog.push("scrolled to the new question");
+    let n = 0;
+    const t = setInterval(() => {
+      n++;
+      const p = document.querySelector("model-response:last-of-type p"); if (p) p.textContent += ` Streamed sentence number ${n} of the answer.`;
+      box = document.getElementById("chat-history"); box.scrollTop = box.scrollHeight;                       // follow the answer
+      if (n === 8) {                                                                                        // rebuild the scroll box, as Angular re-renders do
+        const nb = box.cloneNode(true); box.replaceWith(nb); nb.scrollTop = nb.scrollHeight; window.siteLog.push("rebuilt the scroll box");
+      }
+      if (n >= 25) { clearInterval(t); window.siteLog.push("answer finished"); }
+    }, 100);
+  });
+</script>
+</html>
