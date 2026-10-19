@@ -273,6 +273,12 @@
     const sc = scrollContainerOf(latestMessage());
     lines.push(`scrolls in: ${isDocScroller(sc) ? "the page" : shape(sc)} · position ${Math.round(getTop(sc))} of ${Math.round(maxTop(sc))} · stay put: ${settings.stayPut === false ? "off" : "on"}`);
     lines.push("stay-put log: " + (pinLog.join(" | ") || "nothing yet (no question sent on this page since it loaded)"));
+    // everything on the page that could be a message box, whether or not a hook matched it, so a new site shape can be read off the paste
+    const EDITABLE = 'textarea, input:not([type]), input[type="text"], input[type="search"], [contenteditable], [role="textbox"], rich-textarea, [class*="ql-editor" i], [class*="prompt" i][class*="input" i], [class*="input-area" i], [class*="composer" i], [class*="text-input" i], [data-placeholder]';
+    const seenEd = new Set(); const eds = deepQueryAll(EDITABLE).filter(e => !layer.contains(e) && !seenEd.has(e) && seenEd.add(e)).slice(0, 8);
+    lines.push("editable-looking elements: " + (eds.map(e => `${shape(e).split(" > ").slice(-2).join(" > ")}${e.getAttribute("contenteditable") != null ? ` [contenteditable=${JSON.stringify(e.getAttribute("contenteditable"))}]` : ""}${e.getClientRects().length ? "" : " (not visible)"}${e.closest("[aria-hidden='true']") ? " (aria-hidden)" : ""}${e.closest("[data-cc-msg]") ? " (inside a reply)" : ""}`).join(" | ") || "none"));
+    const hosts = [...document.querySelectorAll("*")].filter(e => e.shadowRoot), closed = [...document.querySelectorAll("*")].filter(e => e.tagName.includes("-") && !e.shadowRoot && customElements.get(e.tagName.toLowerCase()) && e.children.length === 0);
+    lines.push(`shadow roots: ${hosts.length} open${hosts.length ? " (" + [...new Set(hosts.map(e => e.tagName.toLowerCase()))].slice(0, 6).join(", ") + ")" : ""} · empty custom elements (possible closed roots): ${[...new Set(closed.map(e => e.tagName.toLowerCase()))].slice(0, 6).join(", ") || "none"}`);
     const frames = deepQueryAll("iframe"), readable = sameOriginFrameDocs();
     lines.push(`frames on the page: ${frames.length} · readable from here: ${readable.length}` + readable.map((d, i) => {
       const cands = ['textarea', '[contenteditable]', '[role="textbox"]'].flatMap(sel => deepQueryAll(sel, d)).filter(e => e.getClientRects().length > 0);
