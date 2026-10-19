@@ -14,15 +14,21 @@
   const log = (...a) => console.log("[Clean Chat]", ...a);
 
   // ------------------------------------------------------------ storage
+  // After the extension is reloaded at chrome://extensions, scripts already running in open tabs lose their connection
+  // to it: they must not quietly write to the page's own storage instead. Say so once and stop saving.
+  const WAS_EXT = !!globalThis.chrome?.runtime?.id; let saidOrphan = false;
+  const orphaned = () => { if (!WAS_EXT || globalThis.chrome?.runtime?.id) return false; if (!saidOrphan) { saidOrphan = true; try { toast("Clean Chat was updated. Reload this page to keep saving.", 8000); } catch { /* too early */ } } return true; };
   const store = {
     async get(key) {
       try {
+        if (orphaned()) return null;
         if (globalThis.chrome?.storage?.local) { const r = await chrome.storage.local.get(key); return r[key] || null; }
         return JSON.parse(localStorage.getItem(key) || "null");
       } catch { return null; }
     },
     async set(key, val) {
       try {
+        if (orphaned()) return;
         if (globalThis.chrome?.storage?.local) return await chrome.storage.local.set({ [key]: val });
         localStorage.setItem(key, JSON.stringify(val));
       } catch (e) { log("storage failed", e); }
@@ -246,7 +252,7 @@
   const shape = el => { const out = []; for (let n = el, i = 0; n && n !== document.body && i < 7; n = n.parentElement, i++) { const cls = typeof n.className === "string" ? n.className.trim().split(/\s+/).filter(Boolean).slice(0, 4).join(".") : ""; const attrs = [...n.attributes].filter(a => /^(data-testid|data-role|data-message-author-role|id)$/.test(a.name)).map(a => `[${a.name}=${a.value.slice(0, 30)}]`).join(""); out.unshift(n.tagName.toLowerCase() + (cls ? "." + cls : "") + attrs); } return out.join(" > "); };
   async function figInfo() {
     const roots = assistantRoots(), users = userMessages(), box = composer();
-    const lines = [`Clean Chat ${globalThis.chrome?.runtime?.getManifest?.().version || "(local)"} on ${location.hostname} (profile: ${SITE_NAME}${SITE.assistant ? "" : ", generic"}), page ${location.pathname}, conversation ${convoId()}`,
+    const lines = [`Clean Chat ${orphaned() ? "(updated: reload this page)" : globalThis.chrome?.runtime?.getManifest?.().version || "(local)"} on ${location.hostname} (profile: ${SITE_NAME}${SITE.assistant ? "" : ", generic"}), page ${location.pathname}, conversation ${convoId()}`,
       `replies: ${roots.length} via ${matchedSelector || "none"} · questions: ${users.length} via ${matchedUserSel || "none"} · blocks: ${document.querySelectorAll(".cc-block").length} · message box: ${box ? shape(box).split(" > ").pop() : "not found"}`];
     if (roots[0]) lines.push("first reply: " + shape(roots[0]));
     if (users[0]) lines.push("first question: " + shape(users[0]));
@@ -267,6 +273,11 @@
     const sc = scrollContainerOf(latestMessage());
     lines.push(`scrolls in: ${isDocScroller(sc) ? "the page" : shape(sc)} · position ${Math.round(getTop(sc))} of ${Math.round(maxTop(sc))} · stay put: ${settings.stayPut === false ? "off" : "on"}`);
     lines.push("stay-put log: " + (pinLog.join(" | ") || "nothing yet (no question sent on this page since it loaded)"));
+    const frames = deepQueryAll("iframe"), readable = sameOriginFrameDocs();
+    lines.push(`frames on the page: ${frames.length} · readable from here: ${readable.length}` + readable.map((d, i) => {
+      const cands = ['textarea', '[contenteditable]', '[role="textbox"]'].flatMap(sel => deepQueryAll(sel, d)).filter(e => e.getClientRects().length > 0);
+      return ` · frame ${i + 1}: ${cands.length ? "message box candidates: " + cands.slice(0, 3).map(e => shape(e).split(" > ").pop()).join(", ") : "no message box"}`;
+    }).join(""));
     lines.push("frames reporting to Clean Chat: " + (Object.keys(frameSeen).join(", ") || "none"));
     const r = await frameSelections();
     lines.push("frames Clean Chat can read: " + (r.frames.filter(f => !f.top).map(f => `${f.site}${f.text ? " (has a selection)" : ""}`).join(", ") || "none") + (r.error ? ` [${r.error}]` : ""));
@@ -754,7 +765,18 @@
     for (const sel of COMPOSER_SELS) { const el = [...document.querySelectorAll(sel)].find(usable); if (el) return el; }
     for (const sel of COMPOSER_SELS) { const el = deepQueryAll(sel).find(usable); if (el) return el; }                 // inside shadow roots
     const el = deepQueryAll('[contenteditable=""], [contenteditable="plaintext-only"], [role="textbox"]').find(usable);  // other spellings of "editable"
-    return el || null;
+    if (el) return el;
+    for (const doc of sameOriginFrameDocs()) {                                                                            // the box inside a frame of the same site
+      for (const sel of [...COMPOSER_SELS, '[contenteditable=""]', '[contenteditable="plaintext-only"]', '[role="textbox"]']) {
+        const e = deepQueryAll(sel, doc).find(usable); if (e) return e;
+      }
+    }
+    return null;
+  }
+  function sameOriginFrameDocs() {    // documents of frames this page may read (same origin, or srcdoc); others stay sealed
+    const out = [];
+    for (const f of deepQueryAll("iframe")) { try { const d = f.contentDocument; if (d && d.body) out.push(d); } catch { /* another origin */ } }
+    return out;
   }
   function insertIntoComposer(text, ask) {
     if (ask) { state.asks.push({ quote: ask.quote, action: ask.action, t: Date.now() }); saveState(); }
@@ -762,10 +784,11 @@
     if (!ed) { toast("Couldn't find the message box. Copied to clipboard instead."); navigator.clipboard?.writeText(text); return; }
     ed.focus({ preventScroll: true });
     let ok = false;
-    try { ok = document.execCommand("insertText", false, text); } catch { ok = false; }
+    const doc = ed.ownerDocument || document;
+    try { ok = doc.execCommand("insertText", false, text); } catch { ok = false; }
     if (!ok) {
       if (ed.tagName === "TEXTAREA") setNativeValue(ed, ed.value + text);
-      else { ed.appendChild(document.createTextNode(text)); ed.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text })); }
+      else { ed.appendChild(doc.createTextNode(text)); ed.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text })); }
     }
     const r = ed.getBoundingClientRect();
     if (r.bottom > window.innerHeight || r.top < 0) ed.scrollIntoView({ block: "nearest" });   // only if the box is not on screen
