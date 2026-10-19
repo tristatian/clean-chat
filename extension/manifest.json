@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Clean Chat",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "Erase what you understand, park what can wait, save what matters. A reading mode for AI chat sites and Claude Code sessions.",
   "icons": {
     "16": "icons/icon16.png",

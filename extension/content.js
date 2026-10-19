@@ -743,9 +743,18 @@
     Object.getOwnPropertyDescriptor(proto, "value").set.call(el, value);
     el.dispatchEvent(new Event("input", { bubbles: true }));
   }
+  // querySelectorAll that also looks inside open shadow roots, where some sites now keep their editor
+  function deepQueryAll(sel, root = document, out = [], depth = 0) {
+    try { out.push(...root.querySelectorAll(sel)); } catch { /* bad selector */ }
+    if (depth < 6) for (const el of root.querySelectorAll("*")) if (el.shadowRoot) deepQueryAll(sel, el.shadowRoot, out, depth + 1);
+    return out;
+  }
+  const usable = e => !layer.contains(e) && !e.closest("[data-cc-msg]") && !e.closest("[aria-hidden='true']") && (e.getClientRects().length > 0 || e.offsetParent !== null);
   function composer() {           // the message box: never something inside a reply, such as a read-only code editor
-    for (const sel of COMPOSER_SELS) { const el = [...document.querySelectorAll(sel)].find(e => !layer.contains(e) && !e.closest("[data-cc-msg]")); if (el) return el; }
-    return null;
+    for (const sel of COMPOSER_SELS) { const el = [...document.querySelectorAll(sel)].find(usable); if (el) return el; }
+    for (const sel of COMPOSER_SELS) { const el = deepQueryAll(sel).find(usable); if (el) return el; }                 // inside shadow roots
+    const el = deepQueryAll('[contenteditable=""], [contenteditable="plaintext-only"], [role="textbox"]').find(usable);  // other spellings of "editable"
+    return el || null;
   }
   function insertIntoComposer(text, ask) {
     if (ask) { state.asks.push({ quote: ask.quote, action: ask.action, t: Date.now() }); saveState(); }
