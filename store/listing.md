@@ -13,7 +13,7 @@ Collapse what you understand, park what can wait, save what matters. A reading m
 
 **Description:**
 
-Clean Chat turns a conversation with an AI assistant into something you can read like a textbook: collapse what you know, highlight what you don't, keep what matters. It was built for one reader's daily use and grew out of long Claude Code sessions, where the answers are worth keeping but the chat window is a poor place to study them.
+LLM chat is linear. Human learning is often a tree. Some answers you understand right away; others raise more questions than they answer. Clean Chat lets you collapse the answers you understand, highlight what you don't, ask follow-ups on the sub-questions (one click for a simpler version or an example), and, in the companion reader for Claude Code, get suggested questions that fill the gaps in what you know. It works on 19 LLM chat sites and as a reader for Claude Code sessions. It was built for one reader's daily use and grew out of long Claude Code sessions, where the answers are worth keeping but the chat window is a poor place to study them.
 
 COLLAPSE what you understand. Hover a paragraph, a section or a whole question and answer, and press e. It folds to a one-line stub. Undo any time; nothing is deleted.
 
