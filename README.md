@@ -17,8 +17,8 @@ Each folder's README has the install steps and the full list of gestures.
 - **Collapse** a paragraph, a section or a whole question-and-answer once you understand it. It folds to a one-line stub; undo any time. Nothing is deleted.
 - **Later** parks a passage or a question you are curious about, so a deadline is not derailed.
 - **Highlight** a phrase, or ask about it: a follow-up answered right under the passage (on the reader), or a ready prompt put into the message box for you to send (on the sites; the extension never sends anything for you).
-- **Save** a question and answer, a section or a paragraph into one local list across every site, searchable, taggable, exportable, with notes and highlights on top. One note per thing saved. Ask further on any saved note.
-- **Reader only:** follow-ups nest; the bottom box knows what you highlighted, asked and parked; one click gives you five questions to ask next, the big picture behind your questions, or a concept map drawn as a tree.
+- **Save** what matters, from any of the sites or from a Claude Code session, into **one list on your computer**: a question and answer, a section or a paragraph, with your notes and highlights on top, searchable, taggable, pinnable, exported as markdown or a backup file. One note per thing saved: the same words again are refused, and a question whose answer has grown is updated in place. **Ask further** on any saved note, weeks later, from any site.
+- **Questions from your own gaps** (reader): the page keeps what you highlighted, asked and parked, and one click turns that into **five questions to ask next**, a **"Where are my gaps?"** introduction to the context under your questions, or a **concept map** drawn as a tree with the branches your questions touched shaded. Follow-ups nest as deep as you need.
 
 ## Privacy
 
