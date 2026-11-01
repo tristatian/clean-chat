@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clean Chat reader for Claude Code: your session as a page you can highlight, erase (with undo) and park.
+"""Clean Chat reader for Claude Code: your session as a page you can highlight, collapse (with undo) and park.
 
   cc_reader.py                 build the page for the newest session in this project and open it
   cc_reader.py --no-open       build only

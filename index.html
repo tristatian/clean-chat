@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clean Chat</title>
-<meta name="description" content="A reading layer for AI chats and Claude Code sessions: erase what you understand, park what can wait, highlight and ask about what you don't, save what matters.">
+<meta name="description" content="A reading layer for AI chats and Claude Code sessions: collapse what you understand, park what can wait, highlight and ask about what you don't, save what matters.">
 <link rel="icon" href="store/icon128.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
 <main>
   <div class="brand"><img src="store/icon128.png" alt=""><span>Clean Chat</span></div>
   <h1>Read an AI chat like a textbook.</h1>
-  <p class="lede"><span class="erased">Erase what you understand.</span> <span class="parked">Park what can wait.</span> <mark>Highlight and ask about what you don't.</mark> Save what matters. On the chat sites you already use, and on your Claude Code sessions.</p>
+  <p class="lede"><span class="erased">Collapse what you understand.</span> <span class="parked">Park what can wait.</span> <mark>Highlight and ask about what you don't.</mark> Save what matters. On the chat sites you already use, and on your Claude Code sessions.</p>
   <div class="cta">
     <a class="btn primary" href="https://chromewebstore.google.com/detail/clean-chat/jnaancgndlpgaeckmnebcomdoldkijkh">Add to Chrome</a>
     <a class="btn" href="https://github.com/tristatian/clean-chat">Source on GitHub</a>
@@ -53,7 +53,7 @@
 
   <h2>Four gestures</h2>
   <div class="gest">
-    <div class="g"><b>Erase</b>Hover a paragraph, a section or a whole question and answer and press <kbd>e</kbd>. It collapses to a one-line stub. Undo any time; nothing is deleted.</div>
+    <div class="g"><b>Collapse</b>Hover a paragraph, a section or a whole question and answer and press <kbd>e</kbd>. It folds to a one-line stub. Undo any time; nothing is deleted.</div>
     <div class="g"><b>Park</b>Press <kbd>l</kbd> to set a passage aside for later. It stays visible in colour so a deadline is not derailed by a curiosity.</div>
     <div class="g"><b>Ask</b>Select a phrase: a small toolbar offers <i>Ask about this</i>, <i>Simpler</i>, <i>Example</i>. It writes the prompt into the message box; you press send.</div>
     <div class="g"><b>Save</b>Press <kbd>s</kbd> to keep a question and answer, a section or a paragraph in one list across every site, with tags, highlights and your own notes.</div>
@@ -62,7 +62,7 @@
   <figure><img src="store/screenshots/2-saved.png" alt="The saved page with notes from several sites"><figcaption>The saved page: one list across sites, pinned and tagged, a highlight with a note, and a follow-up thread.</figcaption></figure>
 
   <h2>Made for Claude Code too</h2>
-  <p>The companion reader renders a Claude Code session as the same kind of page. Erase, park and highlight as on a site, then ask a follow-up right under the passage. The answer comes from a fork of the session, so the original is never touched, and the forked run is read-only: no shell, no edits, no web. The bottom box knows what you highlighted, asked and parked, and one click gives you five questions to ask next, the big picture behind your questions, or a concept map drawn as a tree.</p>
+  <p>The companion reader renders a Claude Code session as the same kind of page. Collapse, park and highlight as on a site, then ask a follow-up right under the passage. The answer comes from a fork of the session, so the original is never touched, and the forked run is read-only: no shell, no edits, no web. The bottom box knows what you highlighted, asked and parked, and one click gives you five questions to ask next, the big picture behind your questions, or a concept map drawn as a tree.</p>
   <p>Answers run through your own <code>claude</code> command and your own login or API key. Save from the reader into the extension's list, and ask further on any saved note, from any site.</p>
   <figure><img src="store/screenshots/3-reader.png" alt="The Claude Code reader page"><figcaption>The reader. <a href="mockup-v0.html">Open the demo</a> with example content; follow-up answers in the demo are canned.</figcaption></figure>
   <p>Setup: Python 3 and the <code>claude</code> command. Double-click <code>Start Reader.command</code>, or install the slash commands and type <code>/reader</code> in any session. Details in <a href="https://github.com/tristatian/clean-chat/blob/main/claude-code/README.md">the reader's README</a>.</p>

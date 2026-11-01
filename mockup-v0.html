@@ -321,8 +321,8 @@
   <main class="page">
     <div class="column">
       <div class="hint">
-        <span>Hover a paragraph: <b>✓</b> erases it once you understand, <b>?</b> asks about it.</span>
-        <span>Hover the title or a "You asked" card: <b>✓</b> erases the whole question and answer.</span>
+        <span>Hover a paragraph: <b>✓</b> collapses it once you understand, <b>?</b> asks about it.</span>
+        <span>Hover the title or a "You asked" card: <b>✓</b> collapses the whole question and answer.</span>
         <span><b>later</b> parks something that isn't central right now; it stays visible in violet so you can come back.</span>
         <span>Select any phrase to ask about just that.</span>
         <span><kbd>e</kbd> understood · <kbd>l</kbd> later · <kbd>a</kbd> ask · <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>⌘Z</kbd> undo</span>
@@ -335,7 +335,7 @@
 
   <aside class="drawer" id="drawer" hidden aria-label="History">
     <header><h3>History</h3><span class="ctx" id="histSub">nothing yet</span></header>
-    <div class="list" id="histList"><div class="empty">Every erase, question and restore lands here, newest first. Erased passages can be brought back from this list.</div></div>
+    <div class="list" id="histList"><div class="empty">Every collapse, question and restore lands here, newest first. Collapsed passages can be brought back from this list.</div></div>
     <div class="ctxbox" id="ctxbox"></div>
   </aside>
 
@@ -980,7 +980,7 @@
     const hEl = renderBlock(h), pEl = renderBlock(p);
     root.appendChild(hEl); root.appendChild(pEl);
     const para = pEl.querySelector("p");
-    stream(para, "In the real app this section streams from the model, with the whole page above (minus what you have erased) as context. It behaves like any other paragraph: erase it when it is understood, or select a phrase to ask further.");
+    stream(para, "In the real app this section streams from the model, with the whole page above (minus what you have collapsed) as context. It behaves like any other paragraph: erase it when it is understood, or select a phrase to ask further.");
     p.html = "The model's answer to the new question.";
     log("new", q);
     updateProgress();

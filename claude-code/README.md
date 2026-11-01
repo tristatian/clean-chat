@@ -2,7 +2,7 @@
 
 Claude Code has no web page to draw an overlay on, in the terminal or in the desktop app. What carries over is the
 half of Clean Chat that is about your data: saving a question and answer to your notes doc, and parking questions
-for later. The erasing half does not need rebuilding, because Claude Code already has it natively, and there it
+for later. The collapsing half does not need rebuilding, because Claude Code already has it natively, and there it
 changes what the model sees, which the browser extension never could.
 
 ## The reader: the extension's gestures, for a Claude Code session
@@ -92,7 +92,7 @@ else; a web page gets no CORS answer and its request never leaves the browser.
 
 | Command | What it does |
 |---|---|
-| `/reader` | Opens this session as a Clean Chat page: highlight, erase with undo, park for later, ask in place, save into the extension. |
+| `/reader` | Opens this session as a Clean Chat page: highlight, collapse with undo, park for later, ask in place, save into the extension. |
 | `/note` | Saves the last question you typed and Claude's final answer to it to the same Google Doc the extension uses. The Apps Script rewrites the question for clarity, as in the browser. |
 | `/later <question>` | Parks a curiosity question instead of asking it. Claude confirms in a line and carries on with the task. |
 | `/backlog` | Builds `clean_chat/backlog.html` from everything parked in Claude Code. Add the extension's JSON export to the same command line to merge both. |
@@ -106,7 +106,7 @@ session picks them up without a restart. To remove one, delete its folder.
 `--project "<folder>"`, `--session <id>`, or `--any` for whichever session you used last. `--port N` runs a second
 reader beside the first; it keeps its page in `reader/port-N/` so the two never overwrite each other.
 
-## The native eraser
+## The native way to collapse
 
 | Browser extension | Claude Code |
 |---|---|

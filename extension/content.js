@@ -1,5 +1,5 @@
 // Clean Chat — a reading-mode layer for LLM chat sites (Claude, Gemini, ChatGPT, Grok, DeepSeek, Doubao, Kimi, Qwen, Z.ai, Yuanbao, Copilot, Perplexity and more).
-// Erase blocks you understand (they collapse to a stub), highlight a phrase and ask about it
+// Collapse blocks you understand (they fold to a stub), highlight a phrase and ask about it
 // (the quote is placed in the composer for you to finish and send), undo, history.
 // Works at two grains: a paragraph, or a whole question and its answer.
 // Two reasons to collapse: understood (done) or not central right now (later). Drafts can be parked unsent.
@@ -846,7 +846,7 @@
   const layer = document.createElement("div"); layer.id = "cc-layer";
   layer.innerHTML = `
     <div class="cc-gutter" hidden>
-      <button class="cc-gbtn cc-got" title="Got it — erase this block (e)">✓</button>
+      <button class="cc-gbtn cc-got" title="Got it — collapse this block (e)">✓</button>
       <button class="cc-gbtn cc-ask" title="Ask about this block (a)">?</button>
       <button class="cc-gbtn cc-mark-btn" title="Highlight this figure (m)" hidden>highlight</button>
       <button class="cc-gbtn cc-later-btn" title="Not central right now — park it to revisit later (l)">later</button>
@@ -880,7 +880,7 @@
     const r = blk.getBoundingClientRect();
     const isHeading = /^H[1-6]$/.test(blk.tagName), isTurn = blk.classList.contains("cc-turn");
     gutter.querySelector(".cc-got").textContent = "✓";
-    gutter.querySelector(".cc-got").title = isTurn ? "Understood: erase this question and its answer (e)" : (isHeading || (sectionKind(blk) && sectionKeys(blk).length > 1)) ? "Understood: collapse this and everything under it (e)" : "Got it — erase this block (e)";
+    gutter.querySelector(".cc-got").title = isTurn ? "Understood: collapse this question and its answer (e)" : (isHeading || (sectionKind(blk) && sectionKeys(blk).length > 1)) ? "Understood: collapse this and everything under it (e)" : "Got it — erase this block (e)";
     gutter.querySelector(".cc-got").classList.remove("cc-sec");
     const isFig = blk.classList.contains("cc-figure");
     gutter.querySelector(".cc-ask").hidden = isHeading || isTurn;
@@ -1086,13 +1086,13 @@
       <div class="cc-sec"><span>Later <b>${later.length + drafts.length}</b></span><span><button data-act="copy-later">copy</button><button data-act="copy-later-all">copy all chats</button></span></div>
       ${later.length + drafts.length ? later.join("") + drafts.join("") : '<div class="cc-empty">Nothing parked. Hover a paragraph or your own message and click "later", or press ⌥L while typing a question to park it unsent.</div>'}
       <div class="cc-sec"><span>Understood <b>${done.length}</b></span><span><button data-act="restore-all">restore all</button></span></div>
-      ${done.length ? done.join("") : '<div class="cc-empty">Nothing erased yet. Hover a paragraph and click ✓, or hover your own message and click ✓.</div>'}
+      ${done.length ? done.join("") : '<div class="cc-empty">Nothing collapsed yet. Hover a paragraph and click ✓, or hover your own message and click ✓.</div>'}
       <div class="cc-sec"><span>Saved <b>${savedAll.length}</b></span><span><button data-act="open-saved">open saved</button><button data-act="open-journal">journal</button></span></div>
       ${savedHere.length ? savedHere.map(x => `<div class="cc-item"><span class="cc-txt" title="${escapeAttr(x.question)}">${escapeHtml(x.question || "(no question)")}</span><button data-act="unsave" data-k="${escapeAttr(x.id)}">remove</button></div>`).join("") : '<div class="cc-empty">Hover your own message, or a paragraph, and click "save" (or press s) to keep that question and answer inside the extension. The saved page lists everything you have kept, across chats.</div>'}
       <div class="cc-sec"><span>Google Doc, optional</span><span><button data-act="notes-test">send test</button></span></div>
       <div class="cc-item"><input class="cc-endpoint" type="url" placeholder="Apps Script web app URL (…/exec), if you also want a doc" value="${escapeAttr(settings.notesEndpoint || "")}"><button data-act="notes-save">save</button></div>
       <div class="cc-sec"><span>Your data</span><span><button data-act="copy-figs" title="Which hooks matched on this site, and what the figures are made of. No words from the conversation.">copy page info</button> <button data-act="copy-json">copy JSON</button></span></div>
-      <div class="cc-empty">Everything you erase, park and ask is kept per conversation. Copy it as JSON to build a backlog page or a learning review.</div>`;
+      <div class="cc-empty">Everything you collapse, park and ask is kept per conversation. Copy it as JSON to build a backlog page or a learning review.</div>`;
   }
 
   // toast

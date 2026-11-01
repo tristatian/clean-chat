@@ -16,8 +16,8 @@ Updating the code: edit the files, then press the ↻ reload icon on the extensi
 
 | Action | How |
 |---|---|
-| Erase a paragraph you understand | Hover it, click ✓ (or press `e`). It collapses to a faint one-line stub. |
-| Erase a whole section | Hover a heading, click ✓. The section collapses to one line ("+N more"); click it to bring the whole section back. The same happens on a paragraph that works as a title (a bold or numbered lead-in such as **5. Something**), which takes everything up to the next title, and on a paragraph that introduces a list, which takes its bullets. Bullets and ordinary paragraphs still collapse one at a time. |
+| Collapse a paragraph you understand | Hover it, click ✓ (or press `e`). It collapses to a faint one-line stub. |
+| Collapse a whole section | Hover a heading, click ✓. The section collapses to one line ("+N more"); click it to bring the whole section back. The same happens on a paragraph that works as a title (a bold or numbered lead-in such as **5. Something**), which takes everything up to the next title, and on a paragraph that introduces a list, which takes its bullets. Bullets and ordinary paragraphs still collapse one at a time. |
 | Park a paragraph for later | Hover it, click "later" (or press `l`). It collapses to a violet stub, kept apart from the understood ones. Same on headings (whole section) and on your own messages (question and answer). |
 | Park a question before sending it | While typing in the message box, press `⌥L`. The draft is saved to the Later list and the box is cleared, so a curiosity question never derails a deadline. "to box" in the panel puts it back. |
 | Ask about code | Select a stretch of a script, a command or a diagram drawn in text inside a reply, up to 2,500 characters, and the same toolbar appears; the quote keeps its lines. It works even on sites whose code viewer swallows the mouse-up, on code the extension could not map to a paragraph (then it can be asked about but not highlighted), and in editor-style code viewers that the site builds as a read-only editable field. |
@@ -25,7 +25,7 @@ Updating the code: edit the files, then press the ↻ reload icon on the extensi
 | Keep what you read in Claude Code | On the Claude Code reader page (`/reader`, see `claude-code/README.md`), the same "save" button keeps a question and answer, a section or a paragraph here, beside the notes from the chat sites. The extension's bridge script runs only on the reader's local address (`http://127.0.0.1:8379`) and takes the note from the page through `postMessage`; nothing is sent anywhere. |
 | Ask further about anything you kept | Under every saved note, whichever site it came from, an **Ask further** box puts a question to the Clean Chat reader running on this computer. Claude is given that note, the follow-ups already answered on it, and your question, nothing else, about 20k tokens of your Claude subscription a time. The answer is kept with the note, searched and exported with it, and removable one by one. The reader has to be running (Start Reader.command in the `clean_chat` folder, or `/reader` in Claude Code) and, once, you open the reader page with the extension on so it learns which extension may ask. |
 | Annotate what you kept | On the saved page, a "Your notes" box above each answer saves as you type. Select any phrase in the answer to highlight it, or to highlight it and attach a note; click a highlight to edit its note or remove it. Highlights you made while reading travel with the save. Notes and highlights are searched, exported with the item, and included in the backup. |
-| Erase a whole question and answer | Hover your own message, click ✓ (or press `e`). Your question becomes a one-line stub, and Claude's reply, any images or files attached to the question, and that message's own buttons are hidden until you restore it. |
+| Collapse a whole question and answer | Hover your own message, click ✓ (or press `e`). Your question becomes a one-line stub, and Claude's reply, any images or files attached to the question, and that message's own buttons are hidden until you restore it. |
 | Bring a block or a question back | Click its stub, or press `h` for the list and click restore. |
 | Undo | `⌘Z` (when you're not typing), or the Undo on the toast. |
 | Ask about a paragraph | Hover it, click ? (or press `a`). The quote is put in the message box. |
@@ -48,7 +48,7 @@ Two things to know. Removing the extension from Chrome deletes its storage; relo
 data lives in this one Chrome profile, so it is not on your phone or in another browser; "download backup" on the
 saved page writes a JSON file you can keep anywhere, and "copy JSON" in the panel exports the activity index.
 
-State is saved per conversation in the extension's local storage, so erasures survive reloads. A second record, one entry per conversation with what you parked, understood and asked, is kept in an index so it can be read across chats and exported.
+State is saved per conversation in the extension's local storage, so collapsed passages survive reloads. A second record, one entry per conversation with what you parked, understood and asked, is kept in an index so it can be read across chats and exported.
 
 ## Using the data
 
@@ -58,7 +58,7 @@ State is saved per conversation in the extension's local storage, so erasures su
 python3 build_backlog.py clean-chat-export.json backlog.html
 ```
 
-That turns every parked item across every conversation into one Clean Chat page, with a link back to each chat, so the backlog is read and erased with the same tools. The design doc has a review prompt you can paste the JSON into for a weekly summary of what you asked, what you parked, and where your questions cluster.
+That turns every parked item across every conversation into one Clean Chat page, with a link back to each chat, so the backlog is read and collapsed with the same tools. The design doc has a review prompt you can paste the JSON into for a weekly summary of what you asked, what you parked, and where your questions cluster.
 
 ## Google Doc, optional
 
@@ -132,9 +132,9 @@ app's chat window, open the same conversation at claude.ai in Chrome; conversati
 
 ## What it cannot do
 
-Erasing changes what you see, not what Claude sees. Claude's context is still the full transcript,
+Collapsing changes what you see, not what Claude sees. Claude's context is still the full transcript,
 and its replies still arrive at the bottom of the page. That is the ceiling of any extension; the
-independent app in the design doc is where erasing changes the model's context too.
+independent app in the design doc is where collapsing changes the model's context too.
 
 ## Sites
 
@@ -163,7 +163,7 @@ Every site goes through the same three stages: the site's own hooks, then the **
 (`data-message-author-role`, `data-role`, markdown containers such as `.markdown-body`, `.markdown-prose`, `.prose`),
 then a **structural fallback** that needs no hooks at all: the innermost containers of rendered paragraphs are the
 replies, and once there are two replies, the rows of the list that hold no reply are your messages. Paragraph-level
-features (erase, highlight, ask) work on anything the fallback finds; only the question-level features need the
+features (collapse, highlight, ask) work on anything the fallback finds; only the question-level features need the
 question hook. The conversation id comes from the address: a site's own pattern, or `?id=` / the last path segment.
 
 Only the first four sites were run against the live pages. The others were written from open-source exporters' hooks
@@ -186,5 +186,5 @@ To fix it by hand: open DevTools (⌥⌘I) and look for lines starting with `[Cl
   that holds the reply's paragraphs. Add a selector for it to that site's `assistant` list in the
   `SITES` table near the top of `content.js`. The `user` entry is the selector for your own messages
   and `composer` is the message box; `replyContainer` is the box that holds a whole reply (its
-  thinking block included) and is hidden when a question is erased.
+  thinking block included) and is hidden when a question is collapsed.
 - "Couldn't find the message box" means the composer selector needs updating.

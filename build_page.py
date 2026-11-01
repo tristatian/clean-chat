@@ -14,7 +14,7 @@ Transcript format (any of these work):
 
 The first user turn becomes the page title. The first assistant turn becomes the
 page. Every later user turn becomes a "You asked" block followed by that answer,
-so a linear chat reads as one page you can erase section by section.
+so a linear chat reads as one page you can collapse section by section.
 """
 import html
 import json
@@ -167,7 +167,7 @@ def build(turns, title=None):
         seen_first_answer = True
     return {
         "title": title,
-        "meta": "Imported from your conversation. Every answer is now one page: erase what you understand, highlight what you don't. Follow-up answers in this mockup are canned; the real app streams them from the model.",
+        "meta": "Imported from your conversation. Every answer is now one page: collapse what you understand, highlight what you don't. Follow-up answers in this mockup are canned; the real app streams them from the model.",
         "blocks": blocks,
     }
 

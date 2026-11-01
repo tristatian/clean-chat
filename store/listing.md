@@ -9,13 +9,13 @@ Everything below is ready to paste into the Developer Dashboard. Fields are in t
 **Name:** Clean Chat
 
 **Summary (132 max):**
-Erase what you understand, park what can wait, save what matters. A reading mode for AI chat sites and Claude Code sessions.
+Collapse what you understand, park what can wait, save what matters. A reading mode for AI chat sites and Claude Code sessions.
 
 **Description:**
 
-Clean Chat turns a conversation with an AI assistant into something you can read like a textbook: with an eraser, a highlighter and a notebook. It was built for one reader's daily use and grew out of long Claude Code sessions, where the answers are worth keeping but the chat window is a poor place to study them.
+Clean Chat turns a conversation with an AI assistant into something you can read like a textbook: collapse what you know, highlight what you don't, keep what matters. It was built for one reader's daily use and grew out of long Claude Code sessions, where the answers are worth keeping but the chat window is a poor place to study them.
 
-ERASE what you understand. Hover a paragraph, a section or a whole question and answer, and press e. It collapses to a one-line stub. Undo any time; nothing is deleted.
+COLLAPSE what you understand. Hover a paragraph, a section or a whole question and answer, and press e. It folds to a one-line stub. Undo any time; nothing is deleted.
 
 PARK what can wait. Press l to set a passage aside for later. It stays visible in colour so you can come back when the deadline has passed.
 
@@ -23,7 +23,7 @@ ASK about a phrase. Select any words in an answer and a small toolbar offers "As
 
 SAVE what matters. Press s on a question and answer, a section or a paragraph to keep it in one list across every site: searchable, taggable, pinnable, exportable as markdown or a backup file, with your own notes and highlights on top. The same thing saved twice is refused; the same question whose answer grew is updated in place.
 
-MADE FOR CLAUDE CODE TOO. The open-source companion reader (on GitHub, not part of this extension) renders a Claude Code session as the same kind of page: erase, park, highlight, and ask follow-up questions in place, answered by forking the session so the original is never touched. Save from the reader into this extension's list, and ask further on any saved note.
+MADE FOR CLAUDE CODE TOO. The open-source companion reader (on GitHub, not part of this extension) renders a Claude Code session as the same kind of page: collapse, park, highlight, and ask follow-up questions in place, answered by forking the session so the original is never touched. Save from the reader into this extension's list, and ask further on any saved note.
 
 WORKS ON THE MAJOR CHAT SITES. The extension runs on nineteen of the most used AI chat sites, in English and Chinese, through shared markup rules and a structural fallback. Four are checked live by the author. If a site misbehaves, press h on the page, click "copy page info", and paste it into a GitHub issue: markup names only, no words from your conversation.
 

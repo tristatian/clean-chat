@@ -1,6 +1,6 @@
 # Clean Chat
 
-A reading layer for AI chats. Erase what you understand, park what can wait, highlight and ask about what you don't, and keep what matters: on the chat sites you already use, and on your Claude Code sessions.
+A reading layer for AI chats. Collapse what you understand, park what can wait, highlight and ask about what you don't, and keep what matters: on the chat sites you already use, and on your Claude Code sessions.
 
 
 ## Two parts
@@ -14,7 +14,7 @@ Each folder's README has the install steps and the full list of gestures.
 
 ## What it does, in one screen
 
-- **Erase** a paragraph, a section or a whole question-and-answer once you understand it. It collapses to a stub; undo any time. Nothing is deleted.
+- **Collapse** a paragraph, a section or a whole question-and-answer once you understand it. It folds to a one-line stub; undo any time. Nothing is deleted.
 - **Later** parks a passage or a question you are curious about, so a deadline is not derailed.
 - **Highlight** a phrase, or ask about it: a follow-up answered right under the passage (on the reader), or a ready prompt put into the message box for you to send (on the sites; the extension never sends anything for you).
 - **Save** a question and answer, a section or a paragraph into one local list across every site, searchable, taggable, exportable, with notes and highlights on top. One note per thing saved. Ask further on any saved note.

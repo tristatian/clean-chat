@@ -1,6 +1,6 @@
 ---
 name: reader
-description: Open the current Claude Code session as a Clean Chat reader page in the browser, where the user can highlight, erase with undo, and park passages for later. Use when the user types /reader or asks for the reader page.
+description: Open the current Claude Code session as a Clean Chat reader page in the browser, where the user can highlight, collapse with undo, and park passages for later. Use when the user types /reader or asks for the reader page.
 allowed-tools: Bash(python3:*)
 ---
 Result of building the reader page for this session:
