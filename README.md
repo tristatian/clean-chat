@@ -2,6 +2,8 @@
 
 LLM chat is linear. Human learning is often tree-structured. Some answers you understand right away; others raise more questions than they answer. Clean Chat lets you collapse the answers you understand, highlight what you don't, ask follow-ups on the sub-questions (one click for a simpler version or an example), and get suggested questions that fill the gaps in what you know. It works on 19 LLM chat sites and as a reader for Claude Code sessions.
 
+**Project page:** https://tristatian.github.io/clean-chat/ · **Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/clean-chat/jnaancgndlpgaeckmnebcomdoldkijkh) (unlisted, link only) · **Demo of the reader:** [open in the browser](https://tristatian.github.io/clean-chat/mockup-v0.html)
+
 
 ## Two parts
 
