@@ -37,7 +37,7 @@ Clean Chat never reads, stores or copies your credentials or tokens, and it neve
 
 ## Install
 
-- Extension: `chrome://extensions`, Developer mode, **Load unpacked**, pick the `extension` folder. Details in [`extension/README.md`](extension/README.md).
+- Extension: one click from the [Chrome Web Store](https://chromewebstore.google.com/detail/clean-chat/jnaancgndlpgaeckmnebcomdoldkijkh) (unlisted: only this link reaches it). To run the latest code instead: `chrome://extensions`, Developer mode, **Load unpacked**, pick the `extension` folder. Details in [`extension/README.md`](extension/README.md).
 - Reader: Python 3 and the `claude` command. Double-click `Start Reader.command`, or install the slash commands with `claude-code/install_skills.sh` and type `/reader` in any Claude Code session. Details in [`claude-code/README.md`](claude-code/README.md).
 
 ## Layout
