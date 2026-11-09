@@ -279,6 +279,10 @@
     lines.push("editable-looking elements: " + (eds.map(e => `${shape(e).split(" > ").slice(-2).join(" > ")}${e.getAttribute("contenteditable") != null ? ` [contenteditable=${JSON.stringify(e.getAttribute("contenteditable"))}]` : ""}${e.getClientRects().length ? "" : " (not visible)"}${e.closest("[aria-hidden='true']") ? " (aria-hidden)" : ""}${e.closest("[data-cc-msg]") ? " (inside a reply)" : ""}`).join(" | ") || "none"));
     const hosts = [...document.querySelectorAll("*")].filter(e => e.shadowRoot), closed = [...document.querySelectorAll("*")].filter(e => e.tagName.includes("-") && !e.shadowRoot && customElements.get(e.tagName.toLowerCase()) && e.children.length === 0);
     lines.push(`shadow roots: ${hosts.length} open${hosts.length ? " (" + [...new Set(hosts.map(e => e.tagName.toLowerCase()))].slice(0, 6).join(", ") + ")" : ""} · empty custom elements (possible closed roots): ${[...new Set(closed.map(e => e.tagName.toLowerCase()))].slice(0, 6).join(", ") || "none"}`);
+    const shownKeys = new Set([...document.querySelectorAll(".cc-block.cc-erased")].map(e => e.dataset.ccKey)), savedKeys = Object.keys(state.erased);
+    const lost = savedKeys.filter(k => !shownKeys.has(k));
+    lines.push(`collapsed: ${savedKeys.length} saved under ${storeKey().replace(/[0-9a-f]{8,}/gi, m => m.slice(0, 6) + "…")} · ${shownKeys.size} showing · ${lost.length} not on the page now${lost.length ? ` (lengths ${lost.slice(0, 4).map(k => (state.erased[k].text || "").length).join(", ")})` : ""} · questions collapsed: ${Object.keys(state.erasedTurns).length}`);
+    lines.push(`copies of Clean Chat on this page: ${document.querySelectorAll("#cc-layer").length} · storage: ${orphaned() ? "disconnected (reload the page)" : globalThis.chrome?.storage?.local ? "extension" : "page (test mode)"} · last follow-up: ${insertLog} · last typed in: ${lastEditable && lastEditable.isConnected ? shape(lastEditable).split(" > ").slice(-2).join(" > ") : "nothing yet"}`);
     const frames = deepQueryAll("iframe"), readable = sameOriginFrameDocs();
     lines.push(`frames on the page: ${frames.length} · readable from here: ${readable.length}` + readable.map((d, i) => {
       const cands = ['textarea', '[contenteditable]', '[role="textbox"]'].flatMap(sel => deepQueryAll(sel, d)).filter(e => e.getClientRects().length > 0);
@@ -342,12 +346,17 @@
     try {
       const seen = {};
       const roots = assistantRoots();
+      // A key is "hash of the words : which copy of them on the page". Sites redraw a conversation (when the tab comes back,
+      // when old messages are unloaded, when a hidden second copy is added), and the count shifts while the words stay the
+      // same. So a passage of real length that was collapsed stays collapsed wherever its words turn up again.
+      const byHash = {}; for (const k of Object.keys(state.erased)) { const hh = k.slice(0, k.lastIndexOf(":")); if (!byHash[hh]) byHash[hh] = k; }
       roots.forEach((root, mi) => {
         root.dataset.ccMsg = String(mi);
         blocksIn(root).forEach(el => {
-          const h = hash(norm(el.textContent));
+          const words = norm(el.textContent), h = hash(words);
           seen[h] = (seen[h] || 0) + 1;
-          const key = `${h}:${seen[h]}`;
+          let key = `${h}:${seen[h]}`;
+          if (!state.erased[key] && byHash[h] && words.length >= 40) key = byHash[h];
           el.classList.add("cc-block");
           el.dataset.ccKey = key;
           const en = state.erased[key];
@@ -364,7 +373,10 @@
         el.classList.add("cc-figure"); el.dataset.ccFig = key;
         el.classList.toggle("cc-fig-hl", !!state.figs[key]);
       });
+      const turnByHash = {}; for (const k of Object.keys(state.erasedTurns)) { const hh = k.slice(0, k.lastIndexOf(":")); if (!turnByHash[hh]) turnByHash[hh] = k; }
       turns().forEach(t => {
+        const th = t.key.slice(0, t.key.lastIndexOf(":"));
+        if (!state.erasedTurns[t.key] && turnByHash[th] && norm(t.user.textContent).length >= 20) t.key = turnByHash[th];
         t.user.classList.add("cc-turn"); t.user.dataset.ccTurn = t.key;
         const off = !!state.erasedTurns[t.key];
         t.user.classList.toggle("cc-turn-erased", off);
@@ -777,25 +789,59 @@
         const e = deepQueryAll(sel, doc).find(usable); if (e) return e;
       }
     }
-    return null;
+    if (lastEditable && lastEditable.isConnected && usable(lastEditable)) return lastEditable;                             // where the reader last typed
+    return guessComposer();
   }
+  // The box the reader last typed in. Sites keep changing how their message box is built (frames, shadow roots, custom
+  // elements with no "editable" attribute at all), but it is always the thing that last took the reader's typing.
+  let lastEditable = null, insertLog = "nothing yet";
+  const editableLike = t => t && t.nodeType === 1 && !layer.contains(t) && !t.closest?.("[data-cc-msg]") &&
+    (t.isContentEditable || /^(TEXTAREA|INPUT)$/.test(t.tagName) || !!t.editContext || t.getAttribute("role") === "textbox" || t.tagName.includes("-"));
+  ["focusin", "beforeinput", "keydown"].forEach(ev => document.addEventListener(ev, e => {
+    const t = (e.composedPath && e.composedPath()[0]) || e.target;
+    if (ev === "keydown" && (e.key.length !== 1 || e.metaKey || e.ctrlKey)) return;            // only real typing counts
+    if (editableLike(t) && !/^(BODY|HTML)$/.test(t.tagName)) lastEditable = t;
+  }, true));
+  function guessComposer() {         // last resort: something labelled as the prompt, low on the page
+    const c = deepQueryAll('rich-textarea, [aria-label*="prompt" i], [aria-label*="message" i], [aria-label*="ask" i], [data-placeholder], [placeholder]')
+      .filter(e => usable(e) && !/^(BUTTON|A)$/.test(e.tagName) && e.type !== "search" && e.getBoundingClientRect().width > 200);
+    return c.sort((a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top)[0] || null;
+  }
+  const deepActive = () => { let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement; return a; };
   function sameOriginFrameDocs() {    // documents of frames this page may read (same origin, or srcdoc); others stay sealed
     const out = [];
     for (const f of deepQueryAll("iframe")) { try { const d = f.contentDocument; if (d && d.body) out.push(d); } catch { /* another origin */ } }
     return out;
   }
-  function insertIntoComposer(text, ask) {
+  async function insertIntoComposer(text, ask) {
     if (ask) { state.asks.push({ quote: ask.quote, action: ask.action, t: Date.now() }); saveState(); }
     const ed = composer();
-    if (!ed) { toast("Couldn't find the message box. Copied to clipboard instead."); navigator.clipboard?.writeText(text); return; }
+    // not found, or found but it would not take the text: the follow-up goes to the clipboard, and one click reports the page
+    const giveUp = async why => {
+      let copied = false;
+      try { if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); copied = true; } } catch (e) { log("clipboard write failed", e); }
+      insertLog = why;
+      $(".cc-toast-text").textContent = copied ? "Couldn't reach the message box. Your follow-up is copied: click the box and paste." : "Couldn't reach the message box or the clipboard.";
+      $(".cc-undo").textContent = "Report this"; $(".cc-undo").hidden = false; $(".cc-undo").title = "Copies page info (markup names only) to send to the developer";
+      $(".cc-undo").onclick = async () => { $(".cc-undo").textContent = "Undo"; $(".cc-undo").onclick = undo; $(".cc-undo").removeAttribute("title"); copyText(await figInfo(), "Page info copied. Paste it to whoever maintains Clean Chat."); };
+      toastEl.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { hideToast(); $(".cc-undo").textContent = "Undo"; $(".cc-undo").onclick = undo; $(".cc-undo").removeAttribute("title"); }, 15000);
+    };
+    if (!ed) return giveUp("no message box found");
     ed.focus({ preventScroll: true });
     let ok = false;
     const doc = ed.ownerDocument || document;
     try { ok = doc.execCommand("insertText", false, text); } catch { ok = false; }
     if (!ok) {
-      if (ed.tagName === "TEXTAREA") setNativeValue(ed, ed.value + text);
-      else { ed.appendChild(doc.createTextNode(text)); ed.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text })); }
+      if (ed.tagName === "TEXTAREA" || ed.tagName === "INPUT") setNativeValue(ed, ed.value + text);
+      else if (ed.isContentEditable) { ed.appendChild(doc.createTextNode(text)); ed.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text })); }
+      else {
+        // a box with no "editable" attribute (a custom element): hand it the text the way a paste would
+        const target = deepActive() || ed; let taken = false;
+        try { const dt = new DataTransfer(); dt.setData("text/plain", text); taken = !target.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true, composed: true })); } catch { taken = false; }
+        if (!taken) return giveUp(`found ${shape(ed).split(" > ").pop()} but it did not take typed or pasted text`);
+      }
     }
+    insertLog = `put into ${shape(ed).split(" > ").pop()}${ok ? "" : " (fallback)"}`;
     const r = ed.getBoundingClientRect();
     if (r.bottom > window.innerHeight || r.top < 0) ed.scrollIntoView({ block: "nearest" });   // only if the box is not on screen
   }
@@ -1131,5 +1177,7 @@
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
     setInterval(async () => { if (convoId() !== currentConvo) { await loadState(); scan(); renderPanel(); } }, 600);
     log(`ready on ${SITE_NAME}${location.pathname}`);
+    const twoCopies = () => { if (document.querySelectorAll("#cc-layer").length > 1) toast("Two copies of Clean Chat are running on this page (for example the store version and a folder version). They undo each other's work: switch one off at chrome://extensions.", 15000); };
+    twoCopies(); setTimeout(twoCopies, 2500);
   })();
 })();
